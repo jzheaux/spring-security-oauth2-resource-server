@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.resource.authentication;
+package org.springframework.security.oauth2.resource.web;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -14,6 +14,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.resource.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationToken;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.*;
 import org.springframework.util.Assert;
@@ -30,7 +32,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * @see JwtEncodedOAuth2AccessTokenAuthenticationProvider
  * @see OAuth2ResourceAuthenticationToken
  */
-public class OAuth2ResourceAuthenticationFilter extends OncePerRequestFilter {
+public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	private final AuthenticationManager authenticationManager;
 
 	private final AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource =
@@ -38,13 +40,13 @@ public class OAuth2ResourceAuthenticationFilter extends OncePerRequestFilter {
 
 	private AuthenticationEntryPoint authenticationEntryPoint = new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
 
-	public OAuth2ResourceAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public BearerTokenAuthenticationFilter(AuthenticationManager authenticationManager) {
 		Assert.notNull(authenticationManager, "authenticationManager is required");
 		this.authenticationManager = authenticationManager;
 	}
 
-	public OAuth2ResourceAuthenticationFilter(AuthenticationManager authenticationManager,
-											  AuthenticationEntryPoint authenticationEntryPoint) {
+	public BearerTokenAuthenticationFilter(AuthenticationManager authenticationManager,
+										   AuthenticationEntryPoint authenticationEntryPoint) {
 		this(authenticationManager);
 
 		Assert.notNull(authenticationEntryPoint, "authenticationEntryPoint is required");

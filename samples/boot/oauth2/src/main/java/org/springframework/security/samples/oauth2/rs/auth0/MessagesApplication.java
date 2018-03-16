@@ -12,7 +12,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.springframework.security.oauth2.resource.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
-import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationFilter;
+import org.springframework.security.oauth2.resource.web.BearerTokenAuthenticationFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -53,9 +53,9 @@ public class MessagesApplication {
 
 	// @Bean -- We don't want this to get wired by Spring Boot as a servlet-level filter
 	// Is there a more clever way to do this?
-	OAuth2ResourceAuthenticationFilter oauthResourceAuthenticationFilter() {
-		OAuth2ResourceAuthenticationFilter filter =
-			new OAuth2ResourceAuthenticationFilter(authenticationManager());
+	BearerTokenAuthenticationFilter oauthResourceAuthenticationFilter() {
+		BearerTokenAuthenticationFilter filter =
+			new BearerTokenAuthenticationFilter(authenticationManager());
 		//filter.setAuthenticationManager(authenticationManager());
 
 		// We don't want to redirect in a REST call, we just want to proceed to the resource
