@@ -1,4 +1,4 @@
-package org.springframework.messages;
+package org.springframework.security.samples.oauth2.rs.auth0;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

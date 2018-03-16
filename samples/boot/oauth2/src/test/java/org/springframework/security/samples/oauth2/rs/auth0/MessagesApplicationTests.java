@@ -1,4 +1,4 @@
-package org.springframework.messages;
+package org.springframework.security.samples.oauth2.rs.auth0;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;

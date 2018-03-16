@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.security</groupId>
-	<artifactId>spring-security-oauth2-resource-server-sample</artifactId>
+	<artifactId>spring-security-oauth2-resource-server-auth0</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<description>Sample Usage of Spring Security OAuth2 Resource Server</description>
+	<description>Sample Usage of Spring Security OAuth2 Resource Server with Auth0</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

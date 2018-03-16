@@ -1,4 +1,4 @@
-package org.springframework.security.oauth2.auth0;
+package org.springframework.security.samples.oauth2.rs.auth0;
 
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.exceptions.JWTVerificationException;

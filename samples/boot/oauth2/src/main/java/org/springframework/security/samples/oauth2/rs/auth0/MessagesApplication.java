@@ -1,4 +1,4 @@
-package org.springframework.messages;
+package org.springframework.security.samples.oauth2.rs.auth0;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -13,7 +13,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.springframework.security.oauth2.resource.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
 import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationFilter;
-import org.springframework.security.oauth2.auth0.JwtVerifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -32,9 +31,6 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
 import org.springframework.security.oauth2.core.bearer.OAuth2AccessTokenAuthority;
-import org.springframework.security.oauth2.auth0.Auth0JwtDecoderJwkSupport;
-import org.springframework.security.oauth2.auth0.IssuerVerifyingJwtVerifier;
-import org.springframework.security.oauth2.auth0.PemParsingPublicKeyOnlyRSAKeyProvider;
 
 @SpringBootApplication
 public class MessagesApplication {
@@ -106,13 +102,6 @@ public class MessagesApplication {
 		RSAKeyProvider provider = new PemParsingPublicKeyOnlyRSAKeyProvider(is);
 		JWTVerifier verifier = JWT.require(Algorithm.RSA256(provider)).withIssuer("rob").build();
 		return new Auth0JwtDecoderJwkSupport(verifier);
-	}
-
-	@Bean
-	JwtVerifier jwtVerifier() {
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream("id_rsa.pub");
-		RSAKeyProvider provider = new PemParsingPublicKeyOnlyRSAKeyProvider(is);
-		return new IssuerVerifyingJwtVerifier("rob", provider);
 	}
 
 	@Bean
