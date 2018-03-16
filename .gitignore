@@ -1,27 +1,25 @@
-# IDE files (IntelliJ)
-.idea
-*.iml
-
-# Compiled class file
-*.class
-target
-
-# Log file
+classes/
+target/
+*/src/*/java/META-INF
+*/src/META-INF/
+*/src/*/java/META-INF/
+.classpath
+.springBeans
+.project
+.DS_Store
+.settings/
+.idea/
+out/
+bin/
+intellij/
+build/
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+*.log.*
+*.iml
+*.ipr
+*.iws
+.gradle/
+atlassian-ide-plugin.xml
+!etc/eclipse/.checkstyle
+.checkstyle
+s101plugin.state

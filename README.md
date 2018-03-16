@@ -8,18 +8,17 @@ Run the Application
 
 For the moment, running is a two step process:
 
-1. Build `spring-security-oauth2-resource-server`
+1. Build the project
 
 ```
-cd oauth2/oauth2-resource-server
 ./mvnw clean install
 ```
 
-2. Build and run the sample:
+2. Run the sample:
 
 ```
 cd samples/boot/oauth2
-./mvnw spring-boot:run
+../../../mvnw spring-boot:run
 ```
 
 Which will stand up the same messaging service as before, now with JWT-based token security

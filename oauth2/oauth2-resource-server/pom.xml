@@ -8,7 +8,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>messages</name>
 	<description>Draft Project for Spring Security OAuth2 Resource Server</description>
 
 	<parent>
