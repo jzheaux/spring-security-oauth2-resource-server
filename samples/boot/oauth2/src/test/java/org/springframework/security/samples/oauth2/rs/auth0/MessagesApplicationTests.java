@@ -27,15 +27,15 @@ public class MessagesApplicationTests {
 
 	@Before
 	public void setUp() throws IOException {
-		messageBothAuthority =
+		this.messageBothAuthority =
 			IOUtils.toString(
 				this.getClass().getClassLoader().getResourceAsStream("message-both"));
 
-		messageReadAuthority =
+		this.messageReadAuthority =
 			IOUtils.toString(
 				this.getClass().getClassLoader().getResourceAsStream("message-read"));
 
-		messageWriteAuthority =
+		this.messageWriteAuthority =
 			IOUtils.toString(
 				this.getClass().getClassLoader().getResourceAsStream("message-write"));
 	}
@@ -44,12 +44,12 @@ public class MessagesApplicationTests {
 	public void whenProperAuthorizationHeader_thenAllowBoth() {
 		Message toSave = new Message("New");
 
-		ResponseEntity<Message> response = postForMessage("/messages", messageBothAuthority, toSave);
+		ResponseEntity<Message> response = postForMessage("/messages", this.messageBothAuthority, toSave);
 
 		Message saved = response.getBody();
 		assertThat(saved.getText()).isEqualTo(toSave.getText());
 
-		response = getForMessage("/messages/{id}", messageBothAuthority, saved.getId());
+		response = getForMessage("/messages/{id}", this.messageBothAuthority, saved.getId());
 		Message message = response.getBody();
 
 		assertThat(message.getText()).isEqualTo(saved.getText());
@@ -57,7 +57,7 @@ public class MessagesApplicationTests {
 
 	@Test
 	public void whenProperAuthorizationHeader_thenAllowGet() {
-	    ResponseEntity<Message> response = getForMessage("/messages/{id}", messageReadAuthority, 1L);
+	    ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageReadAuthority, 1L);
 
 		Message message = response.getBody();
 
@@ -68,12 +68,12 @@ public class MessagesApplicationTests {
 	public void whenProperAuthorizationHeader_thenAllowPost() {
 		Message toSave = new Message("New");
 
-		ResponseEntity<Message> response = postForMessage("/messages", messageWriteAuthority, toSave);
+		ResponseEntity<Message> response = postForMessage("/messages", this.messageWriteAuthority, toSave);
 
 		Message saved = response.getBody();
 		assertThat(saved.getText()).isEqualTo(toSave.getText());
 
-		response = getForMessage("/messages/{id}", messageReadAuthority, saved.getId());
+		response = getForMessage("/messages/{id}", this.messageReadAuthority, saved.getId());
 		Message message = response.getBody();
 
 		assertThat(message.getText()).isEqualTo(saved.getText());
@@ -94,14 +94,14 @@ public class MessagesApplicationTests {
 
 	@Test
 	public void whenBadAuthorizationHeaderOnRead_denyWith403() {
-		ResponseEntity<Message> response = getForMessage("/messages/{id}", messageWriteAuthority, 1L);
+		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageWriteAuthority, 1L);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 	@Test
 	public void whenBadAuthorizationHeaderOnWrite_denyWith403() {
 		Message toSave = new Message("New");
-		ResponseEntity<Message> response = postForMessage("/messages", messageReadAuthority, toSave);
+		ResponseEntity<Message> response = postForMessage("/messages", this.messageReadAuthority, toSave);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 

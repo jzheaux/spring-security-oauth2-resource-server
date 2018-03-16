@@ -7,9 +7,10 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
-public class PemParsingPublicKeyOnlyRSAKeyProviderTest {
+public class PemParsingPublicKeyOnlyRSAKeyProviderTests {
 	@Test
 	public void whenPemEncoded_thenCanParse() throws IOException {
 		InputStream is = this.getClass()
@@ -20,6 +21,6 @@ public class PemParsingPublicKeyOnlyRSAKeyProviderTest {
 
 		RSAPublicKey key = provider.getPublicKeyById("123");
 
-		assertEquals(new BigInteger("65537"), key.getPublicExponent());
+		assertThat(key.getPublicExponent()).isEqualTo(new BigInteger("65537"));
 	}
 }
