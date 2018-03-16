@@ -15,12 +15,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationFilter;
 import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationToken;
+import org.springframework.security.web.AuthenticationEntryPoint;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OAuthResourceAuthenticationFilterTest {
+	@Mock
+	AuthenticationEntryPoint authenticationEntryPoint;
+
 	@Mock
 	AuthenticationManager authenticationManager;
 

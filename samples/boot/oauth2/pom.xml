@@ -3,13 +3,13 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>sample</groupId>
-	<artifactId>messages</artifactId>
+	<groupId>org.springframework.security</groupId>
+	<artifactId>spring-security-oauth2-resource-server-sample</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>messages</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Sample Usage of Spring Security OAuth2 Resource Server</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -27,6 +27,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-resource-server</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>

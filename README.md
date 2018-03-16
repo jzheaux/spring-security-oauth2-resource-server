@@ -6,9 +6,19 @@ Here is a pretty rough draft for what could be Spring 5.1's Resource Server. To 
 Run the Application
 -------------------
 
-You can do:
+For the moment, running is a two step process:
+
+1. Build `spring-security-oauth2-resource-server`
 
 ```
+cd oauth2/oauth2-resource-server
+./mvnw clean install
+```
+
+2. Build and run the sample:
+
+```
+cd samples/boot/oauth2
 ./mvnw spring-boot:run
 ```
 
