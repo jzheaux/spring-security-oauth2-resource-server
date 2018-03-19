@@ -22,7 +22,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -30,7 +29,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.resourceserver.authentication.OAuth2ResourceAuthenticationToken;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -55,7 +53,7 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
 	private BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
 
-	private AuthenticationEntryPoint authenticationEntryPoint = new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
+	private AuthenticationEntryPoint authenticationEntryPoint = new BearerTokenAuthenticationEntryPoint();
 
 	public BearerTokenAuthenticationFilter(AuthenticationManager authenticationManager) {
 		Assert.notNull(authenticationManager, "authenticationManager is required");
@@ -143,8 +141,17 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	 * @param bearerTokenResolver the {@code BearerTokenResolver} to use
 	 */
 	public void setBearerTokenResolver(BearerTokenResolver bearerTokenResolver) {
-		Assert.notNull(bearerTokenResolver, "bearerTokenResolver is required");
+		Assert.notNull(bearerTokenResolver, "bearerTokenResolver must not be null");
 		this.bearerTokenResolver = bearerTokenResolver;
+	}
+
+	/**
+	 * Set the {@link AuthenticationEntryPoint} to use. Defaults to {@link BearerTokenAuthenticationEntryPoint}.
+	 * @param authenticationEntryPoint the {@code AuthenticationEntryPoint} to use
+	 */
+	public void setAuthenticationEntryPoint(final AuthenticationEntryPoint authenticationEntryPoint) {
+		Assert.notNull(authenticationEntryPoint, "authenticationEntryPoint must not be null");
+		this.authenticationEntryPoint = authenticationEntryPoint;
 	}
 
 }
