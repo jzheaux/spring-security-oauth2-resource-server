@@ -12,6 +12,6 @@
 
 	<modules>
 		<module>oauth2/oauth2-resource-server</module>
-		<module>samples/boot/oauth2</module>
+		<module>samples/boot/oauth2/resource-server</module>
 	</modules>
 </project>

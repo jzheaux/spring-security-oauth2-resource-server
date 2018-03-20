@@ -16,9 +16,10 @@
 package org.springframework.security.oauth2.core.bearer;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationToken;
+import org.springframework.security.oauth2.resourceserver.authentication.OAuth2ResourceAuthenticationToken;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A {@link GrantedAuthority} that may be associated to an {@link OAuth2ResourceAuthenticationToken}.
