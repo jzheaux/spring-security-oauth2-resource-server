@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.samples.config;
+package org.springframework.security.oauth2.core.expression;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.util.Optional;
+import org.springframework.security.core.Authentication;
 
 /**
- * @author Rob Winch
+ * A contract for the OAuth2 SpEL expressions entry point
+ *
+ * @author Josh Cummings
+ * @since 5.1
  */
-public interface MessageRepository extends CrudRepository<Message, Long> {
-	@PreAuthorize("@oauth2.attribute(authentication, 'scope') matches '.*message.read.*'")
-	Optional<Message> findById(Long id);
+public interface OAuth2Expressions {
 
-	@PreAuthorize("authentication.hasAttributeMatches('scope', '.*message.write.*')")
-	Message save(Message message);
+	/**
+	 * Retreive an OAuth2 token attribute from the provided {@link Authentication}
+	 *
+	 * @param authentication
+	 * @param name
+	 * @return
+	 */
+	Object attribute(Authentication authentication, String name);
 }

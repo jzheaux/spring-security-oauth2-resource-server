@@ -29,9 +29,11 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
+import org.springframework.security.oauth2.core.expression.DefaultOAuth2Expressions;
+import org.springframework.security.oauth2.core.expression.OAuth2Expressions;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -57,6 +59,11 @@ public class MessagesApplication {
 				.anyRequest().authenticated().and()
 				.csrf().disable();
 		}
+	}
+
+	@Bean
+	public OAuth2Expressions oauth2() {
+		return new DefaultOAuth2Expressions();
 	}
 
 	// @Bean -- We don't want this to get wired by Spring Boot as a servlet-level filter
