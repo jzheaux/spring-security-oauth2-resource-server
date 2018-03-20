@@ -1,4 +1,4 @@
-My Submission
+Spring Security OAuth2 Resource Server
 =============
 
 Here is a pretty rough draft for what could be Spring 5.1's Resource Server. To run, you can do one of a few things:
