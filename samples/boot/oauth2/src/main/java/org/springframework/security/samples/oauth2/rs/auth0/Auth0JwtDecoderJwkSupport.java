@@ -5,8 +5,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import org.springframework.security.oauth2.jwt.JwtError;
-import org.springframework.security.oauth2.jwt.JwtVerificationException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -44,9 +42,9 @@ public class Auth0JwtDecoderJwkSupport implements JwtDecoder {
 
 			return new Jwt(token, issuedAt, expiresAt, headerClaims, claims);
 		} catch (TokenExpiredException expired) {
-			throw new JwtVerificationException(JwtError.EXPIRED, expired.getMessage());
+			throw new JwtException(expired.getMessage());
 		} catch (JWTVerificationException invalid) {
-			throw new JwtVerificationException(JwtError.INVALID, invalid.getMessage());
+			throw new JwtException(invalid.getMessage());
 		}
 	}
 }

@@ -5,11 +5,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.bearer.OAuth2AccessTokenAuthority;
-import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtVerifier;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
@@ -61,7 +62,7 @@ public class JwtEncodedOAuth2AccessTokenAuthenticationProvider implements Authen
 			Collection<? extends GrantedAuthority> authorities =
 				Arrays.asList(new OAuth2AccessTokenAuthority(claims));
 
-			// Here is where an end user can providing custom resolution of the OAtuh2AccessTokenAuthority,
+			// Here is where an end user can providing custom resolution of the OAuth2AccessTokenAuthority,
 			// including parsing the "scope" claim and converting that list into individual authorities
 			authorities =
 				this.authoritiesMapper.mapAuthorities(authorities);
@@ -79,11 +80,21 @@ public class JwtEncodedOAuth2AccessTokenAuthenticationProvider implements Authen
 	 * @return
 	 */
 	protected Map<String, Object> mapClaims(OAuth2ResourceAuthenticationToken token) {
-		Jwt jwt = this.jwtDecoder.decode(token.getPrincipal());
+		try {
+			Jwt jwt = this.jwtDecoder.decode(token.getPrincipal());
 
-		this.jwtVerifier.verifyClaims(jwt);
+			this.jwtVerifier.verifyClaims(jwt);
 
-		return jwt.getClaims();
+			return jwt.getClaims();
+		} catch ( JwtException failed ) {
+			OAuth2Error invalidRequest =
+				new OAuth2Error(
+					OAuth2ErrorCodes.INVALID_REQUEST,
+					failed.getMessage(),
+					"https://tools.ietf.org/html/rfc6750#section-3.1");
+
+			throw new OAuth2AuthenticationException(invalidRequest, failed);
+		}
 	}
 
 	@Override

@@ -56,7 +56,7 @@ public class AccessTokenJwtVerifier implements JwtVerifier {
 
 		if ( expiry != null ) {
 			if ( Instant.now().isAfter(expiry.plus(maxClockSkew)) ) {
-				throw new JwtVerificationException(JwtError.EXPIRED, jwt);
+				throw new JwtException(String.format("Jwt expired at {}", jwt.getExpiresAt()));
 			}
 		}
 
@@ -64,7 +64,7 @@ public class AccessTokenJwtVerifier implements JwtVerifier {
 
 		if ( notBefore != null ) {
 			if ( Instant.now().isBefore(expiry.minus(maxClockSkew)) ) {
-				throw new JwtVerificationException(JwtError.NOT_BEFORE, jwt);
+				throw new JwtException(String.format("Jwt used before {}", jwt.getNotBefore()));
 			}
 		}
 

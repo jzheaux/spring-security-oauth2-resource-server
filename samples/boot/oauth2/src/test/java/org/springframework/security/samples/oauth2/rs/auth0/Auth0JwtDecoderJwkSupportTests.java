@@ -5,10 +5,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtVerificationException;
+import org.springframework.security.oauth2.jwt.JwtException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +30,7 @@ public class Auth0JwtDecoderJwkSupportTests {
 		String badIssuer = "eyJraWQiOiIxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im1lc3NhZ2Uud3JpdGUiLCJpc3MiOiJyb2JiaWUiLCJleHAiOjIxNDc0MDcyMDAsImlhdCI6MTUxNjI1NTIwMH0.HS5K1QVcJoFmWc6VWJA9VQOYoKv_I0d8VQseeOAik1ZZ5GgQmEZLLuLJgUKvEx4Kodq9ZUyvApuQx0lvl1HqJEEBW80i7_-6ZPSiy9O4VLrXg4nBIxWqYwZ8ASza_7EsUvdo5FUtyyNRFL32jWnXhf5JMN2zxVQcuA4wBiX5VHM";
 
 		assertThatThrownBy(() -> defaultVerifier().decode(badIssuer))
-			.isInstanceOf(JwtVerificationException.class);
+			.isInstanceOf(JwtException.class);
 	}
 
 	@Test
@@ -40,7 +38,7 @@ public class Auth0JwtDecoderJwkSupportTests {
 		String badAlg = "eyJraWQiOiIxMjM0IiwidHlwIjoiSldUIiwiYWxnIjoibm9uZSJ9.eyJzY29wZSI6Im1lc3NhZ2Uud3JpdGUgbWVzc2FnZS5yZWFkIiwiaXNzIjoicm9iIiwiZXhwIjoyMTQ3NDA3MjAwLCJpYXQiOjE1MTYyNTUyMDB9.0";
 
 		assertThatThrownBy(() -> defaultVerifier().decode(badAlg))
-			.isInstanceOf(JwtVerificationException.class);
+			.isInstanceOf(JwtException.class);
 	}
 
 	@Test
@@ -48,7 +46,7 @@ public class Auth0JwtDecoderJwkSupportTests {
 		String expired = "eyJraWQiOiIxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im1lc3NhZ2Uud3JpdGUgbWVzc2FnZS5yZWFkIiwiaXNzIjoicm9iIiwiZXhwIjoxNTE2MjU1MjAwLCJpYXQiOjE1MTYyNTUyMDB9.E6I2qUsoyvT5EXXVia7280nFgUg3qFJKVQhSajQYE3elbMFInS_BwqclrCxA55tyNgTZ-8FaUArnGI3mccPRd5ugSi0eG9_sFq3_Us0hi1Wfk6k8BlJd-UXnuJ6w9cd7VoX7jonuxG35nCh9Nh8iPrSDw7jpd2SDtN6D6Q6Ft4A";
 
 		assertThatThrownBy(() -> defaultVerifier().decode(expired))
-			.isInstanceOf(JwtVerificationException.class);
+			.isInstanceOf(JwtException.class);
 	}
 
 	protected Auth0JwtDecoderJwkSupport defaultVerifier() throws IOException {
