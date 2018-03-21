@@ -16,7 +16,7 @@
 package org.springframework.security.oauth2.core.bearer;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.resource.authentication.OAuth2ResourceAuthenticationToken;
+import org.springframework.security.oauth2.resourceserver.authentication.OAuth2ResourceAuthenticationToken;
 
 import java.util.Collections;
 
