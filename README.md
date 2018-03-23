@@ -11,14 +11,13 @@ For the moment, running is a two step process:
 1. Build the project
 
 ```
-./mvnw clean install
+$ ./gradlew build
 ```
 
 2. Run the sample:
 
 ```
-cd samples/boot/oauth2
-../../../mvnw spring-boot:run
+$ ./gradlew :spring-security-oauth2-resource-server-auth0:bootRun
 ```
 
 Which will stand up the same messaging service as before, now with JWT-based token security
@@ -54,5 +53,5 @@ Run the Tests
 You can do:
 
 ```
-./mvnw test
+./gradlew check
 ```

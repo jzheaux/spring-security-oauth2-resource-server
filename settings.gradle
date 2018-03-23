@@ -1,0 +1,24 @@
+rootProject.name = 'spring-security-oauth2-resource-server'
+
+FileTree buildFiles = fileTree(rootDir) {
+	include '**/*.gradle'
+	exclude '**/gradle', 'settings.gradle', 'buildSrc', '/build.gradle', '.*'
+}
+
+String rootDirPath = rootDir.absolutePath + File.separator
+buildFiles.each { File buildFile ->
+	if (buildFile.name == 'build.gradle') {
+		String buildFilePath = buildFile.parentFile.absolutePath
+		String projectPath = buildFilePath.replace(rootDirPath, '').replaceAll(File.separator, ':')
+		include projectPath
+	}
+	else {
+		String projectName = buildFile.name.replace('.gradle', '')
+		String projectPath = ':' + projectName
+		include projectPath
+		def project = findProject("${projectPath}")
+		project.name = projectName
+		project.projectDir = buildFile.parentFile
+		project.buildFileName = buildFile.name
+	}
+}

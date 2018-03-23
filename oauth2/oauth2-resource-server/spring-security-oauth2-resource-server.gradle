@@ -1,0 +1,9 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	compile 'org.springframework.security:spring-security-config'
+	compile 'org.springframework.security:spring-security-oauth2-jose'
+	compile 'org.springframework.security:spring-security-web'
+
+	compile 'javax.servlet:javax.servlet-api'
+}

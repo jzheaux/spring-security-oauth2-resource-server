@@ -1,0 +1,15 @@
+buildscript {
+	repositories {
+		maven { url 'https://repo.spring.io/plugins-release/' }
+	}
+
+	dependencies {
+		classpath 'io.spring.gradle:spring-build-conventions:0.0.15.RELEASE'
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+	}
+}
+
+apply plugin: 'io.spring.convention.root'
+
+group = 'org.springframework.security'
+description = 'Spring Security OAuth 2.0 Resource Server'
