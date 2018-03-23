@@ -15,6 +15,13 @@
  */
 package org.springframework.security.oauth2.resourceserver.web;
 
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,13 +35,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Optional;
-
 /**
  * An authentication filter that supports the OAuth2 Resource Server Bearer token flow. The intent is that the
  * {@link AuthenticationManager} would be wired with a {@link JwtEncodedOAuth2AccessTokenAuthenticationProvider}
@@ -42,6 +42,7 @@ import java.util.Optional;
  * {@link OAuth2ResourceAuthenticationToken}s.
  *
  * @author Josh Cummings
+ * @author Vedran Pavic
  * @since 5.1
  * @see JwtEncodedOAuth2AccessTokenAuthenticationProvider
  * @see OAuth2ResourceAuthenticationToken
@@ -51,6 +52,8 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
 	private final AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource =
 		new WebAuthenticationDetailsSource();
+
+	private BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
 
 	private AuthenticationEntryPoint authenticationEntryPoint = new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
 
@@ -73,7 +76,7 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
 		final boolean debug = this.logger.isDebugEnabled();
 
-		String token = this.bearerToken(request);
+		String token = this.bearerTokenResolver.resolve(request);
 
 		if (token == null) {
 			filterChain.doFilter(request, response);
@@ -112,19 +115,6 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Retrieve the any bearer token from the request
-	 *
-	 * @param req
-	 * @return
-	 */
-	protected String bearerToken(HttpServletRequest req) {
-		return Optional.ofNullable(req.getHeader("Authorization"))
-			.filter(header -> header.startsWith("Bearer ") && header.length() > 7)
-			.map(header -> header.substring(7))
-			.orElse(null);
-	}
-
-	/**
 	 * A hook for engineers to be alerted of bearer token verification success. Uses might be auditing or monitoring related.
 	 *
 	 * @param request
@@ -149,4 +139,14 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 												HttpServletResponse response,
 												AuthenticationException failed) throws IOException {
 	}
+
+	/**
+	 * Set the {@link BearerTokenResolver} to use. Defaults to {@link DefaultBearerTokenResolver}.
+	 * @param bearerTokenResolver the {@code BearerTokenResolver} to use
+	 */
+	public void setBearerTokenResolver(BearerTokenResolver bearerTokenResolver) {
+		Assert.notNull(bearerTokenResolver, "bearerTokenResolver is required");
+		this.bearerTokenResolver = bearerTokenResolver;
+	}
+
 }
