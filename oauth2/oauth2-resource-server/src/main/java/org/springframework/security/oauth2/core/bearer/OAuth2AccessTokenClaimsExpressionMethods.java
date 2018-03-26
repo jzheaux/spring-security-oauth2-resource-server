@@ -37,7 +37,7 @@ public class OAuth2AccessTokenClaimsExpressionMethods {
 			authentication.getAuthorities()
 				.stream()
 				.filter(authority -> authority instanceof OAuth2AccessTokenAuthority)
-				.map(authority -> (OAuth2AccessTokenAuthority)authority)
+				.map(authority -> (OAuth2AccessTokenAuthority) authority)
 				.findFirst()
 				.orElse(NO_AUTHORITY);
 	}

@@ -23,10 +23,10 @@ import java.util.Optional;
 /**
  * @author Rob Winch
  */
-public interface MessageRepository extends CrudRepository<Message,Long> {
-    @PreAuthorize("authentication.hasClaim('scope').thatMatches('.*message.read.*')")
-    Optional<Message> findById(Long id);
+public interface MessageRepository extends CrudRepository<Message, Long> {
+	@PreAuthorize("authentication.hasClaim('scope').thatMatches('.*message.read.*')")
+	Optional<Message> findById(Long id);
 
-    @PreAuthorize("hasAuthority('message.write')")
-    Message save(Message message);
+	@PreAuthorize("hasAuthority('message.write')")
+	Message save(Message message);
 }

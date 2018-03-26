@@ -23,7 +23,6 @@ import java.math.BigInteger;
 import java.security.interfaces.RSAPublicKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class PemParsingPublicKeyOnlyRSAKeyProviderTests {
 	@Test

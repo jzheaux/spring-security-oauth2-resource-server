@@ -58,7 +58,7 @@ public class JwtEncodedOAuth2AccessTokenAuthenticationProvider implements Authen
 	}
 
 	public JwtEncodedOAuth2AccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
-															 AccessTokenJwtVerifier jwtVerifier) {
+			AccessTokenJwtVerifier jwtVerifier) {
 		Assert.notNull(jwtDecoder, "jwtDecoder is required");
 		Assert.notNull(jwtVerifier, "jwtVerifier is required");
 

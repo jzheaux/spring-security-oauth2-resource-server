@@ -63,7 +63,7 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	public BearerTokenAuthenticationFilter(AuthenticationManager authenticationManager,
-										   AuthenticationEntryPoint authenticationEntryPoint) {
+			AuthenticationEntryPoint authenticationEntryPoint) {
 		this(authenticationManager);
 
 		Assert.notNull(authenticationEntryPoint, "authenticationEntryPoint is required");
@@ -122,9 +122,8 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	 * @param authResult
 	 * @throws IOException
 	 */
-	protected void onSuccessfulAuthentication(HttpServletRequest request,
-											  HttpServletResponse response,
-											  Authentication authResult) throws IOException {
+	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+			Authentication authResult) throws IOException {
 	}
 
 	/**
@@ -135,9 +134,8 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	 * @param failed
 	 * @throws IOException
 	 */
-	protected void onUnsuccessfulAuthentication(HttpServletRequest request,
-												HttpServletResponse response,
-												AuthenticationException failed) throws IOException {
+	protected void onUnsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException failed) throws IOException {
 	}
 
 	/**

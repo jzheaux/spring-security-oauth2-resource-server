@@ -72,7 +72,7 @@ public class MessagesApplicationTests {
 
 	@Test
 	public void whenProperAuthorizationHeader_thenAllowGet() {
-	    ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageReadAuthority, 1L);
+		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageReadAuthority, 1L);
 
 		Message message = response.getBody();
 
