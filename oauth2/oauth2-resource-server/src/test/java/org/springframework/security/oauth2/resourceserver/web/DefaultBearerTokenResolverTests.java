@@ -19,14 +19,13 @@ package org.springframework.security.oauth2.resourceserver.web;
 import java.util.Base64;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.resourceserver.BearerTokenAuthenticationException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link DefaultBearerTokenResolver}.
@@ -36,9 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DefaultBearerTokenResolverTests {
 
 	private static final String TEST_TOKEN = "test-token";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private DefaultBearerTokenResolver resolver;
 
@@ -72,29 +68,25 @@ public class DefaultBearerTokenResolverTests {
 
 	@Test
 	public void resolveWhenValidHeaderIsPresentTogetherWithFormParameterThenAuthenticationExceptionIsThrown() {
-		this.thrown.expect(BearerTokenAuthenticationException.class);
-		this.thrown.expectMessage("[invalid_request]");
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Authorization", "Bearer " + TEST_TOKEN);
 		request.setMethod("POST");
 		request.setContentType("application/x-www-form-urlencoded");
 		request.addParameter("access_token", TEST_TOKEN);
 
-		this.resolver.resolve(request);
+		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
+				.hasMessageContaining("[invalid_request]");
 	}
 
 	@Test
 	public void resolveWhenValidHeaderIsPresentTogetherWithQueryParameterThenAuthenticationExceptionIsThrown() {
-		this.thrown.expect(BearerTokenAuthenticationException.class);
-		this.thrown.expectMessage("[invalid_request]");
-
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Authorization", "Bearer " + TEST_TOKEN);
 		request.setMethod("GET");
 		request.addParameter("access_token", TEST_TOKEN);
 
-		this.resolver.resolve(request);
+		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
+				.hasMessageContaining("[invalid_request]");
 	}
 
 	@Test

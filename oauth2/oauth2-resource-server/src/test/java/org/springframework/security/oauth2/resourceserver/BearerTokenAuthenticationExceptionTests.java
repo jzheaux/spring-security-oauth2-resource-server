@@ -16,12 +16,12 @@
 
 package org.springframework.security.oauth2.resourceserver;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+
 import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link BearerTokenAuthenticationException}.
@@ -34,23 +34,18 @@ public class BearerTokenAuthenticationExceptionTests {
 
 	private static final String TEST_MESSAGE = "test-message";
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void constructorWithAllParametersWhenErrorIsValidThenCreated() {
 		BearerTokenAuthenticationException exception = new BearerTokenAuthenticationException(TEST_ERROR, TEST_MESSAGE,
-			new Throwable());
+				new Throwable());
 
 		assertThat(exception.getError()).isEqualTo(TEST_ERROR);
 	}
 
 	@Test
 	public void constructorWithAllParametersWhenErrorIsNullThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("error must not be null");
-
-		new BearerTokenAuthenticationException(null, TEST_MESSAGE, new Throwable());
+		assertThatThrownBy(() -> new BearerTokenAuthenticationException(null, TEST_MESSAGE, new Throwable()))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("error must not be null");
 	}
 
 	@Test
@@ -62,10 +57,8 @@ public class BearerTokenAuthenticationExceptionTests {
 
 	@Test
 	public void constructorWithErrorAndMessageWhenErrorIsNullThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("error must not be null");
-
-		new BearerTokenAuthenticationException(null, TEST_MESSAGE);
+		assertThatThrownBy(() -> new BearerTokenAuthenticationException(null, TEST_MESSAGE))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("error must not be null");
 	}
 
 }

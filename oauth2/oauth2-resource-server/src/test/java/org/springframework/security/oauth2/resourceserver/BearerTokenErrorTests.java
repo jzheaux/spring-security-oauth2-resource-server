@@ -16,12 +16,12 @@
 
 package org.springframework.security.oauth2.resourceserver;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+
 import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link BearerTokenError}.
@@ -40,9 +40,6 @@ public class BearerTokenErrorTests {
 
 	private static final String TEST_SCOPE = "test-scope";
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void constructorWithErrorCodeWhenErrorCodeIsValidThenCreated() {
 		BearerTokenError error = new BearerTokenError(TEST_ERROR_CODE, TEST_HTTP_STATUS);
@@ -56,26 +53,20 @@ public class BearerTokenErrorTests {
 
 	@Test
 	public void constructorWithErrorCodeAndHttpStatusWhenErrorCodeIsNullThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("errorCode cannot be empty");
-
-		new BearerTokenError(null, TEST_HTTP_STATUS);
+		assertThatThrownBy(() -> new BearerTokenError(null, TEST_HTTP_STATUS))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("errorCode cannot be empty");
 	}
 
 	@Test
 	public void constructorWithErrorCodeAndHttpStatusWhenErrorCodeIsEmptyThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("errorCode cannot be empty");
-
-		new BearerTokenError("", TEST_HTTP_STATUS);
+		assertThatThrownBy(() -> new BearerTokenError("", TEST_HTTP_STATUS))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("errorCode cannot be empty");
 	}
 
 	@Test
 	public void constructorWithErrorCodeAndHttpStatusWhenHttpStatusIsNullThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("httpStatus must not be null");
-
-		new BearerTokenError(TEST_ERROR_CODE, null);
+		assertThatThrownBy(() -> new BearerTokenError(TEST_ERROR_CODE, null))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("httpStatus must not be null");
 	}
 
 	@Test
@@ -92,26 +83,20 @@ public class BearerTokenErrorTests {
 
 	@Test
 	public void constructorWithAllParametersWhenErrorCodeIsNullThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("errorCode cannot be empty");
-
-		new BearerTokenError(null, TEST_HTTP_STATUS, TEST_DESCRIPTION, TEST_URI, TEST_SCOPE);
+		assertThatThrownBy(() -> new BearerTokenError(null, TEST_HTTP_STATUS, TEST_DESCRIPTION, TEST_URI, TEST_SCOPE))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("errorCode cannot be empty");
 	}
 
 	@Test
 	public void constructorWithAllParametersWhenErrorCodeIsEmptyThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("errorCode cannot be empty");
-
-		new BearerTokenError("", TEST_HTTP_STATUS, TEST_DESCRIPTION, TEST_URI, TEST_SCOPE);
+		assertThatThrownBy(() -> new BearerTokenError("", TEST_HTTP_STATUS, TEST_DESCRIPTION, TEST_URI, TEST_SCOPE))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("errorCode cannot be empty");
 	}
 
 	@Test
 	public void constructorWithAllParametersWhenHttpStatusIsNullThenThrowIllegalArgumentException() {
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("httpStatus must not be null");
-
-		new BearerTokenError(TEST_ERROR_CODE, null, TEST_DESCRIPTION, TEST_URI, TEST_SCOPE);
+		assertThatThrownBy(() -> new BearerTokenError(TEST_ERROR_CODE, null, TEST_DESCRIPTION, TEST_URI, TEST_SCOPE))
+				.isInstanceOf(IllegalArgumentException.class).hasMessage("httpStatus must not be null");
 	}
 
 }
