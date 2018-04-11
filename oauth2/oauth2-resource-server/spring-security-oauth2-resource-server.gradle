@@ -6,4 +6,9 @@ dependencies {
 	compile 'org.springframework.security:spring-security-web'
 
 	compile 'javax.servlet:javax.servlet-api'
+
+	testCompile 'org.springframework.security:spring-security-test'
+	testCompile 'org.springframework:spring-webmvc'
+
+	testCompile 'com.squareup.okhttp3:mockwebserver'
 }
