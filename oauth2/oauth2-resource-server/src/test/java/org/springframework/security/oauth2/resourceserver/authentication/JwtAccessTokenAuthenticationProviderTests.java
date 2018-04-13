@@ -34,6 +34,7 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -86,11 +87,11 @@ public class JwtAccessTokenAuthenticationProviderTests {
 	public void authenticateWhenJwtVerifierFailsThenResponseWithInvalidRequest() {
 		PreAuthenticatedAuthenticationToken token = this.authentication();
 
-		doThrow(JwtException.class).when(this.jwtVerifier).verifyClaims(null);
+		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
+		doThrow(OAuth2AuthenticationException.class).when(this.jwtVerifier).verify(anyMap());
 
 		assertThatThrownBy(() -> this.provider.authenticate(token))
-				.matches(failed -> failed instanceof OAuth2AuthenticationException)
-				.matches(errorCode(OAuth2ErrorCodes.INVALID_REQUEST));
+				.isInstanceOf(OAuth2AuthenticationException.class);
 	}
 
 	private PreAuthenticatedAuthenticationToken authentication() {

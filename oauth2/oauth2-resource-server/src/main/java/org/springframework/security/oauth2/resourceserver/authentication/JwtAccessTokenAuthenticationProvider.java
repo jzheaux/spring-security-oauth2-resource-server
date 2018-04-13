@@ -67,7 +67,6 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		Jwt jwt;
 		try {
 			jwt = this.jwtDecoder.decode(String.valueOf(preAuthentication.getPrincipal()));
-			this.jwtVerifier.verifyClaims(jwt);
 		} catch (JwtException failed) {
 			OAuth2Error invalidRequest =
 					new OAuth2Error(
@@ -77,6 +76,8 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 			throw new OAuth2AuthenticationException(invalidRequest, failed);
 		}
+
+		this.jwtVerifier.verify(jwt.getClaims());
 
 		return new JwtAccessTokenAuthenticationToken(jwt);
 	}
