@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -49,7 +48,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 	JwtDecoder jwtDecoder;
 
 	@Mock
-	AccessTokenJwtVerifier jwtVerifier;
+	JwtAccessTokenVerifier jwtVerifier;
 
 	@Mock
 	Jwt jwt;

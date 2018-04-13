@@ -21,7 +21,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -38,20 +37,20 @@ import org.springframework.util.Assert;
  * @author Josh Cummings
  * @author Joe Grandja
  * @since 5.1
- * @see AccessTokenJwtVerifier
+ * @see JwtAccessTokenVerifier
  * @see AuthenticationProvider
  * @see JwtDecoder
  */
 public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
 	private final JwtDecoder jwtDecoder;
-	private final AccessTokenJwtVerifier jwtVerifier;
+	private final JwtAccessTokenVerifier jwtVerifier;
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
-		this(jwtDecoder, new AccessTokenJwtVerifier());
+		this(jwtDecoder, new JwtAccessTokenVerifier());
 	}
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
-												AccessTokenJwtVerifier jwtVerifier) {
+												JwtAccessTokenVerifier jwtVerifier) {
 		Assert.notNull(jwtDecoder, "jwtDecoder is required");
 		Assert.notNull(jwtVerifier, "jwtVerifier is required");
 

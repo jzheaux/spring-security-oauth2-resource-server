@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.jwt;
+package org.springframework.security.oauth2.resourceserver.authentication;
 
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
@@ -45,7 +47,7 @@ import java.util.Map;
  * @see OAuth2TokenVerifier
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  */
-public class AccessTokenJwtVerifier implements OAuth2TokenVerifier {
+public class JwtAccessTokenVerifier implements OAuth2TokenVerifier {
 	private static final Duration DEFAULT_MAX_CLOCK_SKEW = Duration.of(60, ChronoUnit.SECONDS);
 
 	private final OAuth2TokenVerifier additionalVerification;
@@ -55,15 +57,15 @@ public class AccessTokenJwtVerifier implements OAuth2TokenVerifier {
 	/**
 	 * A basic instance with no custom verification and the default max clock skew
 	 */
-	public AccessTokenJwtVerifier() {
+	public JwtAccessTokenVerifier() {
 		this((jwt) -> {});
 	}
 
-	public AccessTokenJwtVerifier(OAuth2TokenVerifier jwtVerifier) {
+	public JwtAccessTokenVerifier(OAuth2TokenVerifier jwtVerifier) {
 		this(jwtVerifier, DEFAULT_MAX_CLOCK_SKEW);
 	}
 
-	public AccessTokenJwtVerifier(OAuth2TokenVerifier jwtVerifier, Duration maxClockSkew) {
+	public JwtAccessTokenVerifier(OAuth2TokenVerifier jwtVerifier, Duration maxClockSkew) {
 		Assert.notNull(jwtVerifier, "jwtVerifier cannot be null");
 		Assert.notNull(maxClockSkew, "maxClockSkew cannot be null");
 

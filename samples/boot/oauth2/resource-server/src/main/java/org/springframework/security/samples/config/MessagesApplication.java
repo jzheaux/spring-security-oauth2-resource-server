@@ -29,7 +29,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
@@ -78,7 +78,7 @@ public class MessagesApplication {
 	@Bean
 	AuthenticationProvider oauthResourceAuthenticationProvider() {
 		JwtAccessTokenAuthenticationProvider provider =
-			new JwtAccessTokenAuthenticationProvider(jwtDecoder(), new AccessTokenJwtVerifier());
+			new JwtAccessTokenAuthenticationProvider(jwtDecoder(), new JwtAccessTokenVerifier());
 
 		return provider;
 	}
