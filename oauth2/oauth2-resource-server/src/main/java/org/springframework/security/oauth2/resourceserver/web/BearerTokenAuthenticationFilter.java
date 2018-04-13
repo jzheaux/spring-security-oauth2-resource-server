@@ -15,37 +15,37 @@
  */
 package org.springframework.security.oauth2.resourceserver.web;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.resourceserver.authentication.OAuth2ResourceAuthenticationToken;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * An authentication filter that supports the OAuth2 Resource Server Bearer token flow. The intent is that the
  * {@link AuthenticationManager} would be wired with a {@link JwtEncodedOAuth2AccessTokenAuthenticationProvider}
  * or some other {@link org.springframework.security.authentication.AuthenticationProvider} that supports
- * {@link OAuth2ResourceAuthenticationToken}s.
+ * {@link PreAuthenticatedAuthenticationToken}.
  *
  * @author Josh Cummings
  * @author Vedran Pavic
+ * @author Joe Grandja
  * @since 5.1
  * @see JwtEncodedOAuth2AccessTokenAuthenticationProvider
- * @see OAuth2ResourceAuthenticationToken
  */
 public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	private final AuthenticationManager authenticationManager;
@@ -83,15 +83,12 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		OAuth2ResourceAuthenticationToken authenticationRequest =
-			new OAuth2ResourceAuthenticationToken(token);
+		PreAuthenticatedAuthenticationToken authenticationRequest = new PreAuthenticatedAuthenticationToken(token, null);
 
 		authenticationRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
 
 		try {
-			OAuth2ResourceAuthenticationToken authenticationResult =
-				(OAuth2ResourceAuthenticationToken)
-					this.authenticationManager.authenticate(new OAuth2ResourceAuthenticationToken(token));
+			Authentication authenticationResult = this.authenticationManager.authenticate(authenticationRequest);
 
 			SecurityContextHolder.getContext().setAuthentication(authenticationResult);
 

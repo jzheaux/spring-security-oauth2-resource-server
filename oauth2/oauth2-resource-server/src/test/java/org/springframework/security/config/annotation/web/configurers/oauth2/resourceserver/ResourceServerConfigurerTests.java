@@ -133,7 +133,7 @@ public class ResourceServerConfigurerTests {
 
 			http
 					.authorizeRequests().anyRequest()
-					.access("authentication.hasClaim('scope', 'permission.read')");
+					.access("authentication.hasAttribute('scope', 'permission.read')");
 		}
 
 		@Bean
@@ -183,7 +183,7 @@ public class ResourceServerConfigurerTests {
 
 			http
 					.authorizeRequests().anyRequest()
-					.access("authentication.hasClaim('scope', 'permission.read')");
+					.access("authentication.hasAttribute('scope', 'permission.read')");
 		}
 
 		@Bean
