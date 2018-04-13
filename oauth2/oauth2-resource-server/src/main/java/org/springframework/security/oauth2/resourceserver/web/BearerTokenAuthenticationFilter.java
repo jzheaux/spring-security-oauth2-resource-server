@@ -92,8 +92,6 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
 			SecurityContextHolder.getContext().setAuthentication(authenticationResult);
 
-			onSuccessfulAuthentication(request, response, authenticationResult);
-
 			filterChain.doFilter(request, response);
 
 			// this is currently a point of debate as to which kind of exception should be caught/thrown in this flow
@@ -105,34 +103,8 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 				this.logger.debug("Authentication request for failed: " + failed);
 			}
 
-			onUnsuccessfulAuthentication(request, response, failed);
-
 			this.authenticationEntryPoint.commence(request, response, failed);
 		}
-	}
-
-	/**
-	 * A hook for engineers to be alerted of bearer token verification success. Uses might be auditing or monitoring related.
-	 *
-	 * @param request
-	 * @param response
-	 * @param authResult
-	 * @throws IOException
-	 */
-	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			Authentication authResult) throws IOException {
-	}
-
-	/**
-	 * A hook for engineers to be alerted of bearer token verification failure. Uses might be auditing or monitoring related.
-	 *
-	 * @param request
-	 * @param response
-	 * @param failed
-	 * @throws IOException
-	 */
-	protected void onUnsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException failed) throws IOException {
 	}
 
 	/**
