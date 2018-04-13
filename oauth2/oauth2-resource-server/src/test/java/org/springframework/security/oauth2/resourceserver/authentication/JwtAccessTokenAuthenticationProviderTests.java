@@ -38,12 +38,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link JwtEncodedOAuth2AccessTokenAuthenticationProvider}
+ * Tests for {@link JwtAccessTokenAuthenticationProvider}
  *
  * @author Josh Cummings
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JwtEncodedOAuth2AccessTokenAuthenticationProviderTests {
+public class JwtAccessTokenAuthenticationProviderTests {
 	@Mock
 	JwtDecoder jwtDecoder;
 
@@ -54,7 +54,7 @@ public class JwtEncodedOAuth2AccessTokenAuthenticationProviderTests {
 	Jwt jwt;
 
 	@InjectMocks
-	JwtEncodedOAuth2AccessTokenAuthenticationProvider provider;
+	JwtAccessTokenAuthenticationProvider provider;
 
 	@Test
 	public void authenticateWhenJwtDecodesThenAuthenticationHasAttributesContainedInJwt() {

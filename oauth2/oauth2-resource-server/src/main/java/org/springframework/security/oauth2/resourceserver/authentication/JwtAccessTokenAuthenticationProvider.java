@@ -42,16 +42,16 @@ import org.springframework.util.Assert;
  * @see AuthenticationProvider
  * @see JwtDecoder
  */
-public class JwtEncodedOAuth2AccessTokenAuthenticationProvider implements AuthenticationProvider {
+public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
 	private final JwtDecoder jwtDecoder;
 	private final AccessTokenJwtVerifier jwtVerifier;
 
-	public JwtEncodedOAuth2AccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
+	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
 		this(jwtDecoder, new AccessTokenJwtVerifier());
 	}
 
-	public JwtEncodedOAuth2AccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
-			AccessTokenJwtVerifier jwtVerifier) {
+	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
+												AccessTokenJwtVerifier jwtVerifier) {
 		Assert.notNull(jwtDecoder, "jwtDecoder is required");
 		Assert.notNull(jwtVerifier, "jwtVerifier is required");
 

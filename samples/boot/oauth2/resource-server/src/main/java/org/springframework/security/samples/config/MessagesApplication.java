@@ -31,7 +31,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -77,8 +77,8 @@ public class MessagesApplication {
 
 	@Bean
 	AuthenticationProvider oauthResourceAuthenticationProvider() {
-		JwtEncodedOAuth2AccessTokenAuthenticationProvider provider =
-			new JwtEncodedOAuth2AccessTokenAuthenticationProvider(jwtDecoder(), new AccessTokenJwtVerifier());
+		JwtAccessTokenAuthenticationProvider provider =
+			new JwtAccessTokenAuthenticationProvider(jwtDecoder(), new AccessTokenJwtVerifier());
 
 		return provider;
 	}

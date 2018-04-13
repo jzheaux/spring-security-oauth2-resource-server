@@ -21,7 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -37,7 +37,7 @@ import java.io.IOException;
 
 /**
  * An authentication filter that supports the OAuth2 Resource Server Bearer token flow. The intent is that the
- * {@link AuthenticationManager} would be wired with a {@link JwtEncodedOAuth2AccessTokenAuthenticationProvider}
+ * {@link AuthenticationManager} would be wired with a {@link JwtAccessTokenAuthenticationProvider}
  * or some other {@link org.springframework.security.authentication.AuthenticationProvider} that supports
  * {@link PreAuthenticatedAuthenticationToken}.
  *
@@ -45,7 +45,7 @@ import java.io.IOException;
  * @author Vedran Pavic
  * @author Joe Grandja
  * @since 5.1
- * @see JwtEncodedOAuth2AccessTokenAuthenticationProvider
+ * @see JwtAccessTokenAuthenticationProvider
  */
 public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	private final AuthenticationManager authenticationManager;
