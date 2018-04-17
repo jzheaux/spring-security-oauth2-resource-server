@@ -22,8 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.oauth2.resourceserver.authentication.OAuth2ResourceAuthenticationToken;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -58,7 +58,8 @@ public class BearerTokenAuthenticationFilterTests {
 
 		this.filter.doFilterInternal(this.request, null, this.filterChain);
 
-		ArgumentCaptor<OAuth2ResourceAuthenticationToken> captor = ArgumentCaptor.forClass(OAuth2ResourceAuthenticationToken.class);
+		ArgumentCaptor<PreAuthenticatedAuthenticationToken> captor =
+				ArgumentCaptor.forClass(PreAuthenticatedAuthenticationToken.class);
 
 		verify(this.authenticationManager).authenticate(captor.capture());
 

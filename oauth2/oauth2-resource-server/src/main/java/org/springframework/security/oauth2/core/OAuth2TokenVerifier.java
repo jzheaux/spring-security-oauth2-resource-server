@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.security.oauth2.core;
 
-package org.springframework.security.oauth2.jwt;
+import java.util.Map;
 
 /**
  * Implementations of this interface are responsible for &quot;verifying&quot;
- * a JSON Web Token's (JWT) claims set
+ * the validity and/or constraints of the attributes contained in an OAuth 2.0 Token.
  *
- * <p>
- * Generally speaking, custom implementations of this contract should be wired as delegates to standard implementations
- * like {@see AccessTokenJwtVerifier}.
- *
- * @author Josh Cummings
+ * @author Joe Grandja
  * @since 5.1
- * @see Jwt
- * @see AccessTokenJwtVerifier
- * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  */
-public interface JwtVerifier {
-	void verifyClaims(Jwt jwt) throws JwtException;
+public interface OAuth2TokenVerifier {
+
+	/**
+	 * Verify the validity and/or constraints of the provided OAuth 2.0 Token attributes.
+	 *
+	 * @param tokenAttributes a {@code Map} of the token attributes
+	 * @throws OAuth2AuthenticationException if an error occurs while attempting to verify the token attributes
+	 */
+	void verify(Map<String, Object> tokenAttributes) throws OAuth2AuthenticationException;
+
 }

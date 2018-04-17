@@ -34,7 +34,7 @@ import org.springframework.security.oauth2.jose.jwk.JwkSetBuilder;
 import org.springframework.security.oauth2.jose.jws.JwsBuilder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.test.web.servlet.MockMvc;
@@ -133,12 +133,12 @@ public class ResourceServerConfigurerTests {
 
 			http
 					.authorizeRequests().anyRequest()
-					.access("authentication.hasClaim('scope', 'permission.read')");
+					.access("authentication.hasAttribute('scope', 'permission.read')");
 		}
 
 		@Bean
 		protected AuthenticationProvider oauth2AuthenticationProvider() {
-			return new JwtEncodedOAuth2AccessTokenAuthenticationProvider(this.jwtDecoder());
+			return new JwtAccessTokenAuthenticationProvider(this.jwtDecoder());
 		}
 
 		@Bean
@@ -183,12 +183,12 @@ public class ResourceServerConfigurerTests {
 
 			http
 					.authorizeRequests().anyRequest()
-					.access("authentication.hasClaim('scope', 'permission.read')");
+					.access("authentication.hasAttribute('scope', 'permission.read')");
 		}
 
 		@Bean
 		protected AuthenticationProvider oauth2AuthenticationProvider() {
-			return new JwtEncodedOAuth2AccessTokenAuthenticationProvider(this.jwtDecoder());
+			return new JwtAccessTokenAuthenticationProvider(this.jwtDecoder());
 		}
 
 		@Bean
