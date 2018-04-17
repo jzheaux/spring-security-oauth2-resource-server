@@ -29,12 +29,9 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.core.bearer.OAuth2AccessTokenAuthority;
-import org.springframework.security.oauth2.jwt.AccessTokenJwtVerifier;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtEncodedOAuth2AccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -42,10 +39,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 
 @SpringBootApplication
 public class MessagesApplication {
@@ -84,25 +77,8 @@ public class MessagesApplication {
 
 	@Bean
 	AuthenticationProvider oauthResourceAuthenticationProvider() {
-		JwtEncodedOAuth2AccessTokenAuthenticationProvider provider =
-			new JwtEncodedOAuth2AccessTokenAuthenticationProvider(jwtDecoder(), new AccessTokenJwtVerifier());
-
-		provider.setAuthoritiesMapper(authorities -> {
-			Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-
-			authorities.forEach(authority -> {
-				if (authority instanceof OAuth2AccessTokenAuthority) {
-					Optional.ofNullable(((OAuth2AccessTokenAuthority) authority).getClaim("scope"))
-						.ifPresent(scope ->
-							Stream.of(scope.toString().split(" "))
-								.map(SimpleGrantedAuthority::new)
-								.forEach(mappedAuthorities::add));
-				}
-				mappedAuthorities.add(authority);
-			});
-
-			return mappedAuthorities;
-		});
+		JwtAccessTokenAuthenticationProvider provider =
+			new JwtAccessTokenAuthenticationProvider(jwtDecoder(), new JwtAccessTokenVerifier());
 
 		return provider;
 	}

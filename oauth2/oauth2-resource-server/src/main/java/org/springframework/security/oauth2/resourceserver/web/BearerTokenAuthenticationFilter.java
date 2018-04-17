@@ -15,35 +15,36 @@
  */
 package org.springframework.security.oauth2.resourceserver.web;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.resourceserver.authentication.OAuth2ResourceAuthenticationToken;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 /**
  * An authentication filter that supports the OAuth2 Resource Server Bearer token flow. The intent is that the
- * {@link AuthenticationManager} would be wired with a {@link JwtEncodedOAuth2AccessTokenAuthenticationProvider}
+ * {@link AuthenticationManager} would be wired with a {@link JwtAccessTokenAuthenticationProvider}
  * or some other {@link org.springframework.security.authentication.AuthenticationProvider} that supports
- * {@link OAuth2ResourceAuthenticationToken}s.
+ * {@link PreAuthenticatedAuthenticationToken}.
  *
  * @author Josh Cummings
  * @author Vedran Pavic
+ * @author Joe Grandja
  * @since 5.1
- * @see JwtEncodedOAuth2AccessTokenAuthenticationProvider
- * @see OAuth2ResourceAuthenticationToken
+ * @see JwtAccessTokenAuthenticationProvider
  */
 public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 	private final AuthenticationManager authenticationManager;
@@ -81,19 +82,14 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		OAuth2ResourceAuthenticationToken authenticationRequest =
-			new OAuth2ResourceAuthenticationToken(token);
+		PreAuthenticatedAuthenticationToken authenticationRequest = new PreAuthenticatedAuthenticationToken(token, null);
 
 		authenticationRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
 
 		try {
-			OAuth2ResourceAuthenticationToken authenticationResult =
-				(OAuth2ResourceAuthenticationToken)
-					this.authenticationManager.authenticate(new OAuth2ResourceAuthenticationToken(token));
+			Authentication authenticationResult = this.authenticationManager.authenticate(authenticationRequest);
 
 			SecurityContextHolder.getContext().setAuthentication(authenticationResult);
-
-			onSuccessfulAuthentication(request, response, authenticationResult);
 
 			filterChain.doFilter(request, response);
 
@@ -106,34 +102,8 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 				this.logger.debug("Authentication request for failed: " + failed);
 			}
 
-			onUnsuccessfulAuthentication(request, response, failed);
-
 			this.authenticationEntryPoint.commence(request, response, failed);
 		}
-	}
-
-	/**
-	 * A hook for engineers to be alerted of bearer token verification success. Uses might be auditing or monitoring related.
-	 *
-	 * @param request
-	 * @param response
-	 * @param authResult
-	 * @throws IOException
-	 */
-	protected void onSuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			Authentication authResult) throws IOException {
-	}
-
-	/**
-	 * A hook for engineers to be alerted of bearer token verification failure. Uses might be auditing or monitoring related.
-	 *
-	 * @param request
-	 * @param response
-	 * @param failed
-	 * @throws IOException
-	 */
-	protected void onUnsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException failed) throws IOException {
 	}
 
 	/**
