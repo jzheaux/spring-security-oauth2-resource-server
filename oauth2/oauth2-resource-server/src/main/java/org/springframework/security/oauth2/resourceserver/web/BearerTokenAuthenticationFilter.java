@@ -15,7 +15,6 @@
  */
 package org.springframework.security.oauth2.resourceserver.web;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
