@@ -16,20 +16,19 @@
 
 package org.springframework.security.oauth2.resourceserver.web;
 
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.resourceserver.BearerTokenAuthenticationException;
 import org.springframework.security.oauth2.resourceserver.BearerTokenError;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.util.Assert;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * An {@link AuthenticationEntryPoint} implementation used to commence authentication of protected resource requests
@@ -83,7 +82,7 @@ public class BearerTokenAuthenticationEntryPoint implements AuthenticationEntryP
 					.map(attribute -> attribute.getKey() + "=\"" + attribute.getValue() + "\"")
 					.collect(Collectors.joining(", ", " ", ""));
 		}
-		response.addHeader("WWW-Authenticate", wwwAuthenticate);
+		response.addHeader(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
 		response.sendError(httpStatus.value(), httpStatus.getReasonPhrase());
 	}
 
@@ -92,7 +91,6 @@ public class BearerTokenAuthenticationEntryPoint implements AuthenticationEntryP
 	 * @param realmName the realm name
 	 */
 	public void setRealmName(String realmName) {
-		Assert.hasText(realmName, "realmName must not be null");
 		this.realmName = realmName;
 	}
 

@@ -16,11 +16,8 @@
 
 package org.springframework.security.oauth2.resourceserver.web;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -29,8 +26,10 @@ import org.springframework.security.oauth2.resourceserver.BearerTokenAuthenticat
 import org.springframework.security.oauth2.resourceserver.BearerTokenError;
 import org.springframework.security.oauth2.resourceserver.BearerTokenErrorCodes;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Tests for {@link BearerTokenAuthenticationEntryPoint}.
@@ -172,9 +171,9 @@ public class BearerTokenAuthenticationEntryPointTests {
 	}
 
 	@Test
-	public void setRealmNameWhenNullRealmNameThenIllegalArgumentException() {
-		assertThatThrownBy(() -> this.authenticationEntryPoint.setRealmName(null))
-				.isInstanceOf(IllegalArgumentException.class).hasMessage("realmName must not be null");
+	public void setRealmNameWhenNullRealmNameThenNoExceptionThrown() {
+		assertThatCode(() -> this.authenticationEntryPoint.setRealmName(null))
+				.doesNotThrowAnyException();
 	}
 
 }
