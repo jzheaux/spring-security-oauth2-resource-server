@@ -59,8 +59,7 @@ public class MessagesApplicationTests {
 				this.getClass().getClassLoader().getResourceAsStream("message-write"));
 	}
 
-	// TODO Josh - commenting this test for now as the exp claim in 'this.messageBothAuthority' is old and therefore Exception is thrown
-//	@Test
+	@Test
 	public void whenProperAuthorizationHeader_thenAllowBoth() {
 		Message toSave = new Message("New");
 
@@ -75,8 +74,7 @@ public class MessagesApplicationTests {
 		assertThat(message.getText()).isEqualTo(saved.getText());
 	}
 
-	// TODO Josh - commenting this test for now as the exp claim in 'this.messageReadAuthority' is old and therefore Exception is thrown
-//	@Test
+	@Test
 	public void whenProperAuthorizationHeader_thenAllowGet() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageReadAuthority, 1L);
 
@@ -85,8 +83,7 @@ public class MessagesApplicationTests {
 		assertThat(message.getText()).isEqualTo("Hello World");
 	}
 
-	// TODO Josh - commenting this test for now as the exp claim in 'this.messageWriteAuthority' is old and therefore Exception is thrown
-//	@Test
+	@Test
 	public void whenProperAuthorizationHeader_thenAllowPost() {
 		Message toSave = new Message("New");
 
@@ -115,16 +112,16 @@ public class MessagesApplicationTests {
 	}
 
 	@Test
-	public void whenBadAuthorizationHeaderOnRead_denyWith401() {
+	public void whenBadAuthorizationHeaderOnRead_denyWith403() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageWriteAuthority, 1L);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 	@Test
-	public void whenBadAuthorizationHeaderOnWrite_denyWith401() {
+	public void whenBadAuthorizationHeaderOnWrite_denyWith403() {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", this.messageReadAuthority, toSave);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 

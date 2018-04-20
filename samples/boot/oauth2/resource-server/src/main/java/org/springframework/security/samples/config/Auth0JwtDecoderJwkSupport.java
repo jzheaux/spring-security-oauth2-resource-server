@@ -21,14 +21,19 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * @author Josh Cummings
+ */
 public class Auth0JwtDecoderJwkSupport implements JwtDecoder {
 	private JWTVerifier verifier;
 
@@ -41,13 +46,18 @@ public class Auth0JwtDecoderJwkSupport implements JwtDecoder {
 		try {
 			DecodedJWT decoded = verifier.verify(token);
 
-			Instant issuedAt = Instant.ofEpochMilli(decoded.getIssuedAt().getTime());
-			Instant expiresAt = Instant.ofEpochMilli(decoded.getExpiresAt().getTime());
+			Instant issuedAt = toInstant(decoded.getIssuedAt(), Instant.MIN);
+			Instant expiresAt = toInstant(decoded.getExpiresAt(), Instant.MAX);
+			Instant notBefore = toInstant(decoded.getNotBefore(), Instant.MIN);
 
 			Map<String, Object> claims =
 				decoded.getClaims().entrySet().stream()
 					.collect(Collectors.toMap(Map.Entry::getKey,
 						e -> e.getValue().as(Object.class)));
+
+			claims.put(JwtClaimNames.IAT, issuedAt);
+			claims.put(JwtClaimNames.EXP, expiresAt);
+			claims.put(JwtClaimNames.NBF, notBefore);
 
 			Map<String, Object> headerClaims = new HashMap<>();
 			headerClaims.put(PublicClaims.KEY_ID, decoded.getKeyId());
@@ -61,5 +71,13 @@ public class Auth0JwtDecoderJwkSupport implements JwtDecoder {
 		} catch (JWTVerificationException invalid) {
 			throw new JwtException(invalid.getMessage());
 		}
+	}
+
+	private Instant toInstant(Date date, Instant defaultInstant) {
+		if ( date == null ) {
+			return defaultInstant;
+		}
+
+		return Instant.ofEpochMilli(date.getTime());
 	}
 }
