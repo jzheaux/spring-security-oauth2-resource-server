@@ -21,13 +21,11 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 /**
  * An implementation of {@see JwtVerifier} for verifying claims in a Jwt-based access token
@@ -47,10 +45,10 @@ import java.util.Map;
  * @see OAuth2TokenVerifier
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  */
-public class JwtAccessTokenVerifier implements OAuth2TokenVerifier {
+public class JwtAccessTokenVerifier implements OAuth2TokenVerifier<Jwt> {
 	private static final Duration DEFAULT_MAX_CLOCK_SKEW = Duration.of(60, ChronoUnit.SECONDS);
 
-	private final OAuth2TokenVerifier additionalVerification;
+	private final OAuth2TokenVerifier<Jwt> additionalVerification;
 
 	private final Duration maxClockSkew;
 
@@ -61,11 +59,11 @@ public class JwtAccessTokenVerifier implements OAuth2TokenVerifier {
 		this((jwt) -> {});
 	}
 
-	public JwtAccessTokenVerifier(OAuth2TokenVerifier jwtVerifier) {
+	public JwtAccessTokenVerifier(OAuth2TokenVerifier<Jwt> jwtVerifier) {
 		this(jwtVerifier, DEFAULT_MAX_CLOCK_SKEW);
 	}
 
-	public JwtAccessTokenVerifier(OAuth2TokenVerifier jwtVerifier, Duration maxClockSkew) {
+	public JwtAccessTokenVerifier(OAuth2TokenVerifier<Jwt> jwtVerifier, Duration maxClockSkew) {
 		Assert.notNull(jwtVerifier, "jwtVerifier cannot be null");
 		Assert.notNull(maxClockSkew, "maxClockSkew cannot be null");
 
@@ -74,33 +72,31 @@ public class JwtAccessTokenVerifier implements OAuth2TokenVerifier {
 	}
 
 	@Override
-	public void verify(Map<String, Object> tokenAttributes) throws OAuth2AuthenticationException {
-		JwtClaimAccessor jwtClaimAccessor = () -> tokenAttributes;
-
-		Instant expiry = jwtClaimAccessor.getExpiresAt();
+	public void verify(Jwt jwt) throws OAuth2AuthenticationException {
+		Instant expiry = jwt.getExpiresAt();
 
 		if ( expiry != null && expiry.isBefore(Instant.MAX) ) {
 			if ( Instant.now().isAfter(expiry.plus(maxClockSkew)) ) {
 				OAuth2Error invalidRequest = new OAuth2Error(
 						OAuth2ErrorCodes.INVALID_REQUEST,
-						String.format("Jwt expired at %s", jwtClaimAccessor.getExpiresAt()),
+						String.format("Jwt expired at %s", jwt.getExpiresAt()),
 						null);
 				throw new OAuth2AuthenticationException(invalidRequest, invalidRequest.toString());
 			}
 		}
 
-		Instant notBefore = jwtClaimAccessor.getNotBefore();
+		Instant notBefore = jwt.getNotBefore();
 
 		if ( notBefore != null && notBefore.isAfter(Instant.MIN) ) {
 			if ( Instant.now().isBefore(notBefore.minus(maxClockSkew)) ) {
 				OAuth2Error invalidRequest = new OAuth2Error(
 						OAuth2ErrorCodes.INVALID_REQUEST,
-						String.format("Jwt used before %s", jwtClaimAccessor.getNotBefore()),
+						String.format("Jwt used before %s", jwt.getNotBefore()),
 						null);
 				throw new OAuth2AuthenticationException(invalidRequest, invalidRequest.toString());
 			}
 		}
 
-		additionalVerification.verify(tokenAttributes);
+		additionalVerification.verify(jwt);
 	}
 }
