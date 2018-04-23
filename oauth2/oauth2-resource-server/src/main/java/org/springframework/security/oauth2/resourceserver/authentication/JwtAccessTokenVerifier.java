@@ -79,7 +79,7 @@ public class JwtAccessTokenVerifier implements OAuth2TokenVerifier {
 
 		Instant expiry = jwtClaimAccessor.getExpiresAt();
 
-		if ( expiry != null ) {
+		if ( expiry != null && expiry.isBefore(Instant.MAX) ) {
 			if ( Instant.now().isAfter(expiry.plus(maxClockSkew)) ) {
 				OAuth2Error invalidRequest = new OAuth2Error(
 						OAuth2ErrorCodes.INVALID_REQUEST,
@@ -91,8 +91,8 @@ public class JwtAccessTokenVerifier implements OAuth2TokenVerifier {
 
 		Instant notBefore = jwtClaimAccessor.getNotBefore();
 
-		if ( notBefore != null ) {
-			if ( Instant.now().isBefore(expiry.minus(maxClockSkew)) ) {
+		if ( notBefore != null && notBefore.isAfter(Instant.MIN) ) {
+			if ( Instant.now().isBefore(notBefore.minus(maxClockSkew)) ) {
 				OAuth2Error invalidRequest = new OAuth2Error(
 						OAuth2ErrorCodes.INVALID_REQUEST,
 						String.format("Jwt used before {}", jwtClaimAccessor.getNotBefore()),
