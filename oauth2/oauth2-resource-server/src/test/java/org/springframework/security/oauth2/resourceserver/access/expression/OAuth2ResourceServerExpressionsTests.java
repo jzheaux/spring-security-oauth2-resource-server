@@ -70,7 +70,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SecurityTestExecutionListeners
-public class DefaultOAuth2ExpressionsTests {
+public class OAuth2ResourceServerExpressionsTests {
 	AnnotationConfigWebApplicationContext context;
 	MockMvc mvc;
 
@@ -86,7 +86,7 @@ public class DefaultOAuth2ExpressionsTests {
 		Authentication authentication =
 				this.authentication.attribute("scope", "permission").authenticate();
 
-		DefaultOAuth2Expressions expressions = new DefaultOAuth2Expressions();
+		OAuth2ResourceServerExpressions expressions = new OAuth2ResourceServerExpressions();
 
 		assertThat(expressions.attribute(authentication, "scope")).isEqualTo("permission");
 	}
@@ -95,7 +95,7 @@ public class DefaultOAuth2ExpressionsTests {
 	public void attributeWhenAttributeIsMissingThenNull() {
 		Authentication authentication = this.authentication.authenticate();
 
-		DefaultOAuth2Expressions expressions = new DefaultOAuth2Expressions();
+		OAuth2ResourceServerExpressions expressions = new OAuth2ResourceServerExpressions();
 
 		assertThat(expressions.attribute(authentication, "scope")).isEqualTo(null);
 	}
@@ -183,7 +183,7 @@ public class DefaultOAuth2ExpressionsTests {
 		 */
 		@Bean
 		public OAuth2Expressions oauth2() {
-			return new DefaultOAuth2Expressions();
+			return new OAuth2ResourceServerExpressions();
 		}
 	}
 
@@ -252,10 +252,10 @@ public class DefaultOAuth2ExpressionsTests {
 							("@oauth2.attribute(authentication, 'iss') matches '.*springframework.org'")
 					.antMatchers("/needsExactlyPermissionScope")
 						.access
-							("@oauth2.attribute(authentication, 'scope') == 'permission'")
+							("@oauth2.hasScope(authentication, 'permission')")
 					.antMatchers("/needsOneOfTwoScopes")
 						.access
-							("@oauth2.attribute(authentication, 'scope') matches '.*permission.(read|write).*'")
+							("@oauth2.hasAnyScope(authentication, 'permission.read', 'permission.write')")
 					.and()
 				.csrf().disable();
 
@@ -264,7 +264,7 @@ public class DefaultOAuth2ExpressionsTests {
 
 		@Bean
 		public OAuth2Expressions oauth2() {
-			return new DefaultOAuth2Expressions();
+			return new OAuth2ResourceServerExpressions();
 		}
 
 		BearerTokenAuthenticationFilter bearerTokenAuthenticationFilter() {

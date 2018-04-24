@@ -17,6 +17,8 @@ package org.springframework.security.oauth2.resourceserver.access.expression;
 
 import org.springframework.security.core.Authentication;
 
+import java.util.Collection;
+
 /**
  * A contract for the OAuth2 SpEL expressions entry point
  *
@@ -33,4 +35,39 @@ public interface OAuth2Expressions {
 	 * @return
 	 */
 	Object attribute(Authentication authentication, String name);
+
+	/**
+	 * Retreive any OAuth2 scopes in the provided {@link Authentication}
+	 *
+	 * @param authentication
+	 * @return
+	 */
+	Collection<String> scopes(Authentication authentication);
+
+	/**
+	 * Confirm that the provided {@link Authentication} has the given scope
+	 *
+	 * @param authentication
+	 * @param scope
+	 * @return
+	 */
+	boolean hasScope(Authentication authentication, String scope);
+
+	/**
+	 * Confirm that the provided {@link Authentication} has any of the given scopes
+	 *
+	 * @param authentication
+	 * @param scopes
+	 * @return
+	 */
+	boolean hasAnyScope(Authentication authentication, String... scopes);
+
+	/**
+	 * Confirm that the provided {@link Authentication} has all of the given scopes
+	 *
+	 * @param authentication
+	 * @param scopes
+	 * @return
+	 */
+	boolean hasAllScopes(Authentication authentication, String... scopes);
 }
