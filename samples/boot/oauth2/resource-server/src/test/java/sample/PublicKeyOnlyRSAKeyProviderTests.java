@@ -13,20 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.samples.config;
+package sample;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.junit.Test;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * @author Rob Winch
- */
-public interface MessageRepository extends CrudRepository<Message, Long> {
-	@PreAuthorize("@oauth2.attribute(authentication, 'scope') matches '.*message.read.*'")
-	Optional<Message> findById(Long id);
+public class PublicKeyOnlyRSAKeyProviderTests {
+	PublicKeyOnlyRSAKeyProvider provider = (s) -> null;
 
-	@PreAuthorize("authentication.hasAttributeMatches('scope', '.*message.write.*')")
-	Message save(Message message);
+	@Test
+	public void whenTryPrivateKey_thenError() {
+		assertThatThrownBy(() -> this.provider.getPrivateKey())
+			.isInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test
+	public void whenTryPrivateKeyId_thenError() {
+		assertThatThrownBy(() -> this.provider.getPrivateKeyId())
+			.isInstanceOf(UnsupportedOperationException.class);
+	}
 }
