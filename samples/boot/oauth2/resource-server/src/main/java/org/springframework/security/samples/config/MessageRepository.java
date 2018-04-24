@@ -24,7 +24,7 @@ import java.util.Optional;
  * @author Rob Winch
  */
 public interface MessageRepository extends CrudRepository<Message, Long> {
-	@PreAuthorize("authentication.hasAttributeMatches('scope', '.*message.read.*')")
+	@PreAuthorize("@oauth2.attribute(authentication, 'scope') matches '.*message.read.*'")
 	Optional<Message> findById(Long id);
 
 	@PreAuthorize("authentication.hasAttributeMatches('scope', '.*message.write.*')")
