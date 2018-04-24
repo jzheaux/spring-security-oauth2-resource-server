@@ -42,7 +42,7 @@ public class JwtAccessTokenVerifierTests {
 
 		JwtAccessTokenVerifier verifier = new JwtAccessTokenVerifier();
 
-		assertThatThrownBy(() -> verifier.verify(jwt.getClaims()))
+		assertThatThrownBy(() -> verifier.verify(jwt))
 				.hasMessageContaining("Jwt expired at " + expiry);
 	}
 
@@ -59,7 +59,7 @@ public class JwtAccessTokenVerifierTests {
 
 		JwtAccessTokenVerifier verifier = new JwtAccessTokenVerifier();
 
-		assertThatThrownBy(() -> verifier.verify(jwt.getClaims()))
+		assertThatThrownBy(() -> verifier.verify(jwt))
 				.hasMessageContaining("Jwt used before " + oneHourFromNow);
 	}
 }

@@ -33,7 +33,6 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -87,7 +86,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 		PreAuthenticatedAuthenticationToken token = this.authentication();
 
 		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
-		doThrow(OAuth2AuthenticationException.class).when(this.jwtVerifier).verify(anyMap());
+		doThrow(OAuth2AuthenticationException.class).when(this.jwtVerifier).verify(this.jwt);
 
 		assertThatThrownBy(() -> this.provider.authenticate(token))
 				.isInstanceOf(OAuth2AuthenticationException.class);
