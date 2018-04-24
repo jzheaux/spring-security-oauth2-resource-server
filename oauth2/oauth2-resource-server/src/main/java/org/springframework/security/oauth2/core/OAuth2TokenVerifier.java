@@ -15,23 +15,22 @@
  */
 package org.springframework.security.oauth2.core;
 
-import java.util.Map;
-
 /**
  * Implementations of this interface are responsible for &quot;verifying&quot;
  * the validity and/or constraints of the attributes contained in an OAuth 2.0 Token.
  *
  * @author Joe Grandja
+ * @author Josh Cummings
  * @since 5.1
  */
-public interface OAuth2TokenVerifier {
+public interface OAuth2TokenVerifier<T extends AbstractOAuth2Token> {
 
 	/**
-	 * Verify the validity and/or constraints of the provided OAuth 2.0 Token attributes.
+	 * Verify the validity and/or constraints of the provided OAuth 2.0 Token.
 	 *
-	 * @param tokenAttributes a {@code Map} of the token attributes
+	 * @param token an OAuth 2.0 token
 	 * @throws OAuth2AuthenticationException if an error occurs while attempting to verify the token attributes
 	 */
-	void verify(Map<String, Object> tokenAttributes) throws OAuth2AuthenticationException;
+	void verify(T token) throws OAuth2AuthenticationException;
 
 }

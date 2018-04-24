@@ -76,7 +76,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 			throw new OAuth2AuthenticationException(invalidRequest, failed);
 		}
 
-		this.jwtVerifier.verify(jwt.getClaims());
+		this.jwtVerifier.verify(jwt);
 
 		return new JwtAccessTokenAuthenticationToken(jwt);
 	}
