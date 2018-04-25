@@ -23,7 +23,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoderLocalKeySupport;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
@@ -35,10 +35,12 @@ import org.springframework.security.oauth2.resourceserver.web.BearerTokenResolve
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import java.security.Key;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Example configuration:
@@ -129,8 +131,13 @@ public class ResourceServerConfigurer {
 			return this.parent;
 		}
 
-		public JwtAccessTokenFormatConfigurer keys(PublicKey key) {
-			this.parent.jwtDecoder.decoder(new NimbusJwtDecoder(key));
+		public JwtAccessTokenFormatConfigurer keys(Map<String, Key> keys) {
+			this.parent.jwtDecoder.decoder(new NimbusJwtDecoderLocalKeySupport(keys));
+			return this.parent;
+		}
+
+		public JwtAccessTokenFormatConfigurer key(String keyId, PublicKey key) {
+			this.parent.jwtDecoder.decoder(new NimbusJwtDecoderLocalKeySupport(keyId, key));
 			return this.parent;
 		}
 	}

@@ -27,8 +27,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Josh Cummings
@@ -50,8 +54,12 @@ public class MessagesApplication implements BeanFactoryAware {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
+			Map<String, Key> keys = keyPairs().entrySet().stream().collect(Collectors.toMap(
+					Map.Entry::getKey,
+					entry -> entry.getValue().getPublic()));
+
 			resourceServer()
-					.jwt().signature().key("123", keyPair().getPublic())
+					.jwt().signature().keys(keys)
 
 				.and().apply(http);
 		}
@@ -62,14 +70,20 @@ public class MessagesApplication implements BeanFactoryAware {
 	}
 
 	@Bean
-	KeyPair keyPair() {
+	Map<String, KeyPair> keyPairs() {
+		Map<String, KeyPair> keyPairs = new HashMap<>();
+
 		try {
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 			generator.initialize(2048);
-			return generator.generateKeyPair();
+
+			keyPairs.put("foo", generator.generateKeyPair());
+			keyPairs.put("bar", generator.generateKeyPair());
 		} catch ( Exception e ) {
 			throw new IllegalArgumentException(e);
 		}
+
+		return keyPairs;
 	}
 
 	public static void main(String[] args) {

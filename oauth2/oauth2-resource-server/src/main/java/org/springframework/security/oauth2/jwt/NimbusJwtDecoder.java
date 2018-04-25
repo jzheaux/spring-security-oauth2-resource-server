@@ -15,44 +15,20 @@
  */
 package org.springframework.security.oauth2.jwt;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
-import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
-import com.nimbusds.jwt.proc.DefaultJWTProcessor;
-import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
+import com.nimbusds.jwt.proc.JWTProcessor;
 
-import java.security.PublicKey;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NimbusJwtDecoder implements JwtDecoder {
-	private final JWSAlgorithm jwsAlgorithm;
-	private final ConfigurableJWTProcessor<SecurityContext> jwtProcessor;
+	private final JWTProcessor<SecurityContext> jwtProcessor;
 
-	public NimbusJwtDecoder(PublicKey publicKey) {
-		this(JwsAlgorithms.RS256, publicKey);
-	}
-
-	public NimbusJwtDecoder(String jwsAlgorithm, PublicKey publicKey) {
-		this.jwsAlgorithm = JWSAlgorithm.parse(jwsAlgorithm);
-
-		JWSKeySelector<SecurityContext> jwsKeySelector =
-				(jwsHeader, context) -> {
-					if ( jwsHeader.getAlgorithm() == this.jwsAlgorithm ) {
-						return Arrays.asList(publicKey);
-					} else {
-						return Collections.emptyList();
-					}
-				};
-
-		this.jwtProcessor = new DefaultJWTProcessor<>();
-		this.jwtProcessor.setJWSKeySelector(jwsKeySelector);
+	public NimbusJwtDecoder(JWTProcessor<SecurityContext> jwtProcessor) {
+		this.jwtProcessor = jwtProcessor;
 	}
 
 	@Override
