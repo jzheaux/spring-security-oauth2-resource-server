@@ -64,7 +64,7 @@ public class MessagesApplicationTests {
 	}
 
 	@Test
-	public void whenProperAuthorizationHeader_thenAllowBoth() throws Exception {
+	public void requestWhenProperAuthorizationHeaderThenBothRequestsAreAllowed() throws Exception {
 		Message toSave = new Message("New");
 
 		ResponseEntity<Message> response = postForMessage("/messages", this.messageBothAuthority, toSave);
@@ -79,7 +79,7 @@ public class MessagesApplicationTests {
 	}
 
 	@Test
-	public void whenProperAuthorizationHeader_thenAllowGet() {
+	public void readWhenProperAuthorizationHeaderThenGetIsAllowed() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageReadAuthority, 1L);
 
 		Message message = response.getBody();
@@ -88,7 +88,7 @@ public class MessagesApplicationTests {
 	}
 
 	@Test
-	public void whenProperAuthorizationHeader_thenAllowPost() {
+	public void writeWhenProperAuthorizationHeaderThenPostIsAllowed() {
 		Message toSave = new Message("New");
 
 		ResponseEntity<Message> response = postForMessage("/messages", this.messageWriteAuthority, toSave);
@@ -103,26 +103,26 @@ public class MessagesApplicationTests {
 	}
 
 	@Test
-	public void whenNoAuthorizationHeaderOnRead_denyWith401() {
+	public void readWhenNoAuthorizationHeaderThenRequestIsUnauthorized() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", null, 1L);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 	}
 
 	@Test
-	public void whenNoAuthorizationHeaderOnWrite_denyWith401() {
+	public void writeWhenNoAuthorizationHeaderThenRequestIsUnauthorized() {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", null, toSave);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 	}
 
 	@Test
-	public void whenBadAuthorizationHeaderOnRead_denyWith403() {
+	public void readWhenBadAuthorizationHeaderThenRequestIsForbidden() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageWriteAuthority, 1L);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 
 	@Test
-	public void whenBadAuthorizationHeaderOnWrite_denyWith403() {
+	public void writeWhenBadAuthorizationHeaderThenRequestIsForbidden() {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", this.messageReadAuthority, toSave);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
