@@ -19,77 +19,48 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
-import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.io.InputStream;
-import java.util.Arrays;
 
 @SpringBootApplication
-public class MessagesApplication {
+public class MessagesApplication implements BeanFactoryAware {
+
+	private ConfigurableBeanFactory beanFactory;
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if ( beanFactory instanceof ConfigurableBeanFactory ) {
+			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		}
+	}
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			http
-				.addFilterAfter(
-					oauthResourceAuthenticationFilter(),
-					BasicAuthenticationFilter.class)
-				.exceptionHandling()
-				.authenticationEntryPoint(restAuthenticationEntryPoint()).and()
-				.authorizeRequests()
-				.anyRequest().authenticated().and()
-				.csrf().disable();
+
+			resourceServer()
+					.jwt(jwtDecoder())
+
+				.and().apply(http);
 		}
-	}
 
+		protected ResourceServerConfigurer resourceServer() {
+			return new ResourceServerConfigurer(MessagesApplication.this.beanFactory);
+		}
 
-
-	@Bean
-	public OAuth2Expressions oauth2() {
-		return new OAuth2ResourceServerExpressions();
-	}
-
-	// @Bean -- We don't want this to get wired by Spring Boot as a servlet-level filter
-	// Is there a more clever way to do this?
-	BearerTokenAuthenticationFilter oauthResourceAuthenticationFilter() {
-		BearerTokenAuthenticationFilter filter =
-			new BearerTokenAuthenticationFilter(authenticationManager());
-
-		return filter;
-	}
-
-	@Bean
-	AuthenticationManager authenticationManager() {
-		return new ProviderManager(
-			Arrays.asList(oauthResourceAuthenticationProvider())
-		);
-	}
-
-	@Bean
-	AuthenticationProvider oauthResourceAuthenticationProvider() {
-		JwtAccessTokenAuthenticationProvider provider =
-			new JwtAccessTokenAuthenticationProvider(jwtDecoder(), new JwtAccessTokenVerifier());
-
-		return provider;
 	}
 
 	@Bean
@@ -97,12 +68,7 @@ public class MessagesApplication {
 		InputStream is = this.getClass().getClassLoader().getResourceAsStream("id_rsa.pub");
 		RSAKeyProvider provider = new PemParsingPublicKeyOnlyRSAKeyProvider(is);
 		JWTVerifier verifier = JWT.require(Algorithm.RSA256(provider)).withIssuer("rob").build();
-		return new Auth0JwtDecoderJwkSupport(verifier);
-	}
-
-	@Bean
-	AuthenticationEntryPoint restAuthenticationEntryPoint() {
-		return new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED);
+		return new Auth0JwtDecoder(verifier);
 	}
 
 	public static void main(String[] args) {

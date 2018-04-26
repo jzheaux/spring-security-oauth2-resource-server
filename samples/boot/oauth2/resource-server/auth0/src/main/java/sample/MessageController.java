@@ -43,6 +43,7 @@ public class MessageController {
 
 	@PostMapping
 	public Message save(@Valid @RequestBody Message message) {
-		return this.messages.save(message);
+		Message n = this.messages.save(message);
+		return n;
 	}
 }

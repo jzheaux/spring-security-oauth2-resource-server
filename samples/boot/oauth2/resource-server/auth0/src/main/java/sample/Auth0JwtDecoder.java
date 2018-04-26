@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 /**
  * @author Josh Cummings
  */
-public class Auth0JwtDecoderJwkSupport implements JwtDecoder {
+public class Auth0JwtDecoder implements JwtDecoder {
 	private JWTVerifier verifier;
 
-	public Auth0JwtDecoderJwkSupport(JWTVerifier verifier) {
+	public Auth0JwtDecoder(JWTVerifier verifier) {
 		this.verifier = verifier;
 	}
 

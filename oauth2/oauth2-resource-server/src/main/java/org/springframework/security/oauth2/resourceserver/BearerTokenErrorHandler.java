@@ -87,7 +87,7 @@ public class BearerTokenErrorHandler {
 					.collect(Collectors.joining(", ", " ", ""));
 		}
 		response.addHeader(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
-		response.sendError(httpStatus.value(), httpStatus.getReasonPhrase());
+		response.setStatus(httpStatus.value());
 	}
 
 	public void setRealmName(String realmName) {

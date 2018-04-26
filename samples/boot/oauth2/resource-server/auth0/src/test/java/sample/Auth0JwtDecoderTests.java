@@ -29,7 +29,7 @@ import java.io.InputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class Auth0JwtDecoderJwkSupportTests {
+public class Auth0JwtDecoderTests {
 	@Test
 	public void whenSignatureAndIssuerValid_thenDecodeToken() throws IOException {
 		String goodToken = "eyJraWQiOiIxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im1lc3NhZ2UucmVhZCIsImlzcyI6InJvYiIsImV4cCI6MjE0NzQwNzIwMCwiaWF0IjoxNTE2MjU1MjAwfQ.XJ8d6fQpo53eH_8nduS7rZOB9szHkVTYkZgzfpF3s6dq0DH-ovgFWBE1evfIXHTQwpAil1X856lp_mvJH0pWVXjM2jM5g_qMGen25210-9R9A94ShiM3iSeMAozHl2L6nmdifJR9Na0fWPo4rogB6_N0GoBG2haaB9yU2r925hw";
@@ -63,7 +63,7 @@ public class Auth0JwtDecoderJwkSupportTests {
 			.isInstanceOf(JwtException.class);
 	}
 
-	protected Auth0JwtDecoderJwkSupport defaultVerifier() throws IOException {
+	protected Auth0JwtDecoder defaultVerifier() throws IOException {
 		InputStream is = this.getClass()
 			.getClassLoader().getResourceAsStream("id_rsa.pub");
 
@@ -72,6 +72,6 @@ public class Auth0JwtDecoderJwkSupportTests {
 
 		JWTVerifier verifier = JWT.require(Algorithm.RSA256(key)).withIssuer("rob").build();
 
-		return new Auth0JwtDecoderJwkSupport(verifier);
+		return new Auth0JwtDecoder(verifier);
 	}
 }
