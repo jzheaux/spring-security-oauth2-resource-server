@@ -91,7 +91,7 @@ public class DefaultBearerTokenResolverTests {
 
 	@Test
 	public void resolveWhenFormParameterIsPresentAndSupportedThenTokenIsResolved() {
-		this.resolver.setUseFormEncodedBodyParameter(true);
+		this.resolver.setAllowFormEncodedBodyParameter(true);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("POST");
@@ -113,7 +113,7 @@ public class DefaultBearerTokenResolverTests {
 
 	@Test
 	public void resolveWhenQueryParameterIsPresentAndSupportedThenTokenIsResolved() {
-		this.resolver.setUseUriQueryParameter(true);
+		this.resolver.setAllowUriQueryParameter(true);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");

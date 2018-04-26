@@ -38,9 +38,9 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 
 	private static final Pattern authorizationPattern = Pattern.compile("^Bearer (?<token>[a-zA-Z0-9-._~+/]+)=*$");
 
-	private boolean useFormEncodedBodyParameter = false;
+	private boolean allowFormEncodedBodyParameter = false;
 
-	private boolean useUriQueryParameter = false;
+	private boolean allowUriQueryParameter = false;
 
 	@Override
 	public String resolve(HttpServletRequest request) {
@@ -62,18 +62,18 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 
 	/**
 	 * Set if transport of access token using form-encoded body parameter is supported. Defaults to {@code false}.
-	 * @param useFormEncodedBodyParameter if the form-encoded body parameter is supported
+	 * @param allowFormEncodedBodyParameter if the form-encoded body parameter is supported
 	 */
-	public void setUseFormEncodedBodyParameter(boolean useFormEncodedBodyParameter) {
-		this.useFormEncodedBodyParameter = useFormEncodedBodyParameter;
+	public void setAllowFormEncodedBodyParameter(boolean allowFormEncodedBodyParameter) {
+		this.allowFormEncodedBodyParameter = allowFormEncodedBodyParameter;
 	}
 
 	/**
 	 * Set if transport of access token using URI query parameter is supported. Defaults to {@code false}.
-	 * @param useUriQueryParameter if the URI query parameter is supported
+	 * @param allowUriQueryParameter if the URI query parameter is supported
 	 */
-	public void setUseUriQueryParameter(boolean useUriQueryParameter) {
-		this.useUriQueryParameter = useUriQueryParameter;
+	public void setAllowUriQueryParameter(boolean allowUriQueryParameter) {
+		this.allowUriQueryParameter = allowUriQueryParameter;
 	}
 
 	private static String resolveFromAuthorizationHeader(HttpServletRequest request) {
@@ -88,8 +88,8 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 	}
 
 	private boolean isParameterTokenSupportedForRequest(HttpServletRequest request) {
-		return ((this.useFormEncodedBodyParameter && "POST".equals(request.getMethod()))
-				|| (this.useUriQueryParameter && "GET".equals(request.getMethod())));
+		return ((this.allowFormEncodedBodyParameter && "POST".equals(request.getMethod()))
+				|| (this.allowUriQueryParameter && "GET".equals(request.getMethod())));
 	}
 
 }
