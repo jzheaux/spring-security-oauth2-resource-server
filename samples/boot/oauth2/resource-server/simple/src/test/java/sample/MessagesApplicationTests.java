@@ -25,12 +25,16 @@ import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jose.jws.JwsBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.security.KeyPair;
 
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -60,6 +64,23 @@ public class MessagesApplicationTests {
 				.header("Authorization", "Bearer " + token))
 				.andExpect(content().string("ok"))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void performWhenProperAuthorizationHeaderThenNoSessionCreated()
+			throws Exception {
+
+		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.claim("scp", "ok")
+				.sign("123", keyPair.getPrivate())
+				.build();
+
+		MvcResult result =
+				this.mockMvc.perform(get("/ok")
+					.header("Authorization", "Bearer " + token))
+					.andReturn();
+
+		assertThat(result.getRequest().getSession(false)).isNull();
 	}
 
 	@Test

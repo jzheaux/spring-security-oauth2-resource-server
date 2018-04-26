@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -161,12 +162,14 @@ public class ResourceServerConfigurer {
 		http
 				.addFilterAfter(oauthResourceAuthenticationFilter(),
 						BasicAuthenticationFilter.class)
-						.exceptionHandling()
+				.sessionManagement()
+						.sessionCreationPolicy(SessionCreationPolicy.NEVER).and()
+				.exceptionHandling()
 						.accessDeniedHandler(bearerTokenAccessDeniedHandler())
 						.authenticationEntryPoint(bearerTokenAuthenticationEntryPoint()).and()
-						.authorizeRequests()
-								.anyRequest().authenticated().and()
-								.csrf().disable();
+				.authorizeRequests()
+						.anyRequest().authenticated().and()
+						.csrf().disable();
 
 		//TODO find better way to register this; the other configurers don't appear to do it this way
 		if ( !this.beanFactory.containsBean("oauth2") ) {
