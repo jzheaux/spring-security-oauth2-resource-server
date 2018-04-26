@@ -67,6 +67,15 @@ public class DefaultBearerTokenResolverTests {
 	}
 
 	@Test
+	public void resolveWhenHeaderWithInvalidCharactersIsPresentThenAuthenticationExceptionIsThrown() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Authorization", "Bearer an\"invalid\"token");
+
+		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
+				.hasMessageContaining(("[invalid_request]"));
+	}
+
+	@Test
 	public void resolveWhenValidHeaderIsPresentTogetherWithFormParameterThenAuthenticationExceptionIsThrown() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Authorization", "Bearer " + TEST_TOKEN);

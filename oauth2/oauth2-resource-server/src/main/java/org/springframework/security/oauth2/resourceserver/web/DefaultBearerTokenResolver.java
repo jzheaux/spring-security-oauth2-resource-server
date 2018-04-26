@@ -70,6 +70,10 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 
 	/**
 	 * Set if transport of access token using URI query parameter is supported. Defaults to {@code false}.
+	 *
+	 * The spec recommends against using this mechanism for sending bearer tokens, and even goes as far as
+	 * stating that it was only included for completeness.
+	 *
 	 * @param allowUriQueryParameter if the URI query parameter is supported
 	 */
 	public void setAllowUriQueryParameter(boolean allowUriQueryParameter) {
@@ -78,11 +82,16 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 
 	private static String resolveFromAuthorizationHeader(HttpServletRequest request) {
 		String authorization = request.getHeader("Authorization");
-		if (StringUtils.hasText(authorization)) {
+		if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer")) {
 			Matcher matcher = authorizationPattern.matcher(authorization);
-			if (matcher.matches()) {
-				return matcher.group("token");
+
+			if ( !matcher.matches() ) {
+				BearerTokenError error = new BearerTokenError(BearerTokenErrorCodes.INVALID_REQUEST,
+						HttpStatus.BAD_REQUEST);
+				throw new BearerTokenAuthenticationException(error, error.toString());
 			}
+
+			return matcher.group("token");
 		}
 		return null;
 	}
