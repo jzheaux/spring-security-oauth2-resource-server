@@ -78,7 +78,13 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 		this.jwtVerifier.verify(jwt);
 
-		return new JwtAccessTokenAuthenticationToken(jwt);
+		JwtAccessTokenAuthenticationToken token = new JwtAccessTokenAuthenticationToken(jwt);
+
+		if ( jwt.getClaims().get("scp") != null ) {
+			token.setScopeAttributeName("scp");
+		}
+
+		return token;
 	}
 
 	@Override

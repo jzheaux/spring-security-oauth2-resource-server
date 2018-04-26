@@ -15,9 +15,11 @@
  */
 package org.springframework.security.oauth2.core;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An accessor for projecting scope from an underlying claim set
@@ -46,10 +48,10 @@ public interface ScopeClaimAccessor extends ClaimAccessor {
 			return null;
 		}
 
-		return Arrays.asList(asString.split(delimiter));
+		return Stream.of(asString.split(delimiter)).collect(Collectors.toList());
 	}
 
-	default Collection<String> getScope(String scopeClaimName) {
-		return this.getClaimAsStringList(scopeClaimName, " ");
+	default Set<String> getScope(String scopeClaimName) {
+		return new LinkedHashSet<>(this.getClaimAsStringList(scopeClaimName, " "));
 	}
 }

@@ -28,6 +28,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A {@link JwtDecoder} for Nimbus for locally-configured verification keys.
+ *
+ * @since 5.1
+ * @author Josh Cummings
+ */
 public class NimbusJwtDecoderLocalKeySupport implements JwtDecoder {
 	private final NimbusJwtDecoder decoder;
 

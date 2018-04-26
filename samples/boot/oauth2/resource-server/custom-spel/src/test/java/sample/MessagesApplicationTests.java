@@ -23,10 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jose.jws.JwsBuilder;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.security.KeyPair;
+import java.util.Arrays;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -52,7 +54,17 @@ public class MessagesApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("scp", "ok")
+				.claim(JwtClaimNames.ISS, "https://myhost")
+				.sign("123", keyPair.getPrivate())
+				.build();
+
+		this.mockMvc.perform(get("/ok")
+				.header("Authorization", "Bearer " + token))
+				.andExpect(content().string("ok"))
+				.andExpect(status().isOk());
+
+		token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.claim("scp", Arrays.asList("ok"))
 				.sign("123", keyPair.getPrivate())
 				.build();
 
@@ -83,8 +95,8 @@ public class MessagesApplicationTests {
 				.andExpect(status().isForbidden())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"insufficient_scope\", " +
-								"error_description=\"Resource requires any or all of these scopes [ok]\", " +
-								"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
-								"scope=\"ok\""));
+						"error_description=\"Resource requires any or all of these scopes [ok]\", " +
+						"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
+						"scope=\"ok\""));
 	}
 }

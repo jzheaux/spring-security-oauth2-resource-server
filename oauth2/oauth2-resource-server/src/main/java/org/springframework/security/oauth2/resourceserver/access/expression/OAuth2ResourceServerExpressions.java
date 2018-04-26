@@ -16,8 +16,10 @@
 package org.springframework.security.oauth2.resourceserver.access.expression;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.core.ScopeClaimAccessor;
 import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
+import org.springframework.security.oauth2.resourceserver.InsufficientScopeError;
 import org.springframework.security.oauth2.resourceserver.authentication.AbstractOAuth2AccessTokenAuthenticationToken;
 
 import java.net.URL;
@@ -27,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * A class for evaluating SpEL expressions based on OAuth2 Authentication tokens.
@@ -36,14 +39,14 @@ import java.util.Optional;
  * @see AbstractOAuth2AccessTokenAuthenticationToken
  */
 public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtExpressions {
-	private String scopeClaimName;
+	private final boolean throwOnMissingScope;
 
 	public OAuth2ResourceServerExpressions() {
-		this.scopeClaimName = "scope";
+		this(true);
 	}
 
-	public OAuth2ResourceServerExpressions(String scopeClaimName) {
-		this.scopeClaimName = scopeClaimName;
+	public OAuth2ResourceServerExpressions(boolean throwOnMissingScope) {
+		this.throwOnMissingScope = throwOnMissingScope;
 	}
 
 	@Override
@@ -52,32 +55,38 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 	}
 
 	@Override
-	public Collection<String> scopes(Authentication authentication) {
-		return scope(authentication).getScope(this.scopeClaimName);
+	public Set<String> scopes(Authentication authentication) {
+		return scope(authentication).getScope(scopeAttributeName(authentication));
 	}
 
 	@Override
 	public boolean hasScope(Authentication authentication, String scope) {
-		return Optional.ofNullable(scopes(authentication))
-					.map(auth -> auth.contains(scope))
-					.orElse(false);
+		Optional<Boolean> has =
+				Optional.ofNullable(scopes(authentication))
+						.map(auth -> auth.contains(scope));
+
+		return this.maybeInsufficientIfNot(has, scope);
 	}
 
 	@Override
 	public boolean hasAnyScope(Authentication authentication, String... scopes) {
-		return Optional.ofNullable(scopes(authentication))
-					.map(auth -> {
-						auth.retainAll(Arrays.asList(scopes));
-						return !auth.isEmpty();
-					})
-					.orElse(false);
+		Optional<Boolean> has =
+				Optional.ofNullable(scopes(authentication))
+						.map(auth -> {
+							auth.retainAll(Arrays.asList(scopes));
+							return !auth.isEmpty();
+						});
+
+		return this.maybeInsufficientIfNot(has, scopes);
 	}
 
 	@Override
 	public boolean hasAllScopes(Authentication authentication, String... scopes) {
-		return Optional.ofNullable(scopes(authentication))
-					.map(auth -> auth.containsAll(Arrays.asList(scopes)))
-					.orElse(false);
+		Optional<Boolean> has =
+				Optional.ofNullable(scopes(authentication))
+						.map(auth -> auth.containsAll(Arrays.asList(scopes)));
+
+		return this.maybeInsufficientIfNot(has, scopes);
 	}
 
 	@Override
@@ -115,6 +124,28 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 		return jwt(authentication).getSubject();
 	}
 
+	public void insufficientIfNot(boolean has, String... scopes) {
+		if ( !has ) {
+			throw new OAuth2AccessDeniedException(new InsufficientScopeError(scopes));
+		}
+	}
+
+	private boolean maybeInsufficientIfNot(Optional<Boolean> maybe, String... scopes) {
+		boolean has = maybe.orElse(false);
+
+		if ( this.throwOnMissingScope ) {
+			this.insufficientIfNot(has, scopes);
+		}
+
+		return has;
+	}
+
+	private String scopeAttributeName(Authentication authentication) {
+		return token(authentication)
+					.map(token -> token.getScopeAttributeName())
+					.orElse("scope");
+	}
+
 	private ScopeClaimAccessor scope(Authentication authentication) {
 		return () -> attributes(authentication);
 	}
@@ -124,10 +155,14 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 	}
 
 	private Map<String, Object> attributes(Authentication authentication) {
+		return token(authentication)
+					.map(token -> token.getTokenAttributes())
+					.orElse(Collections.emptyMap());
+	}
+
+	private Optional<AbstractOAuth2AccessTokenAuthenticationToken> token(Authentication authentication) {
 		return Optional.ofNullable(authentication)
 				.filter(auth -> auth instanceof AbstractOAuth2AccessTokenAuthenticationToken)
-				.map(auth -> (AbstractOAuth2AccessTokenAuthenticationToken) auth)
-				.map(auth -> auth.getTokenAttributes())
-				.orElse(Collections.emptyMap());
+				.map(auth -> (AbstractOAuth2AccessTokenAuthenticationToken) auth);
 	}
 }

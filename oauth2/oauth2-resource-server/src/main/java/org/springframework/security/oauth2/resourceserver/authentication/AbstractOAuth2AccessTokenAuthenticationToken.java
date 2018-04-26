@@ -75,7 +75,7 @@ public abstract class AbstractOAuth2AccessTokenAuthenticationToken extends Abstr
 	 *
 	 * @return the attribute name used to access the scope(s) associated to the access token
 	 */
-	protected final String getScopeAttributeName() {
+	public final String getScopeAttributeName() {
 		return this.scopeAttributeName;
 	}
 

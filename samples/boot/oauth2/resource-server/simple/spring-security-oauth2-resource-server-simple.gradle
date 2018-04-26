@@ -6,6 +6,8 @@ dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-security'
 	compile 'org.springframework.boot:spring-boot-starter-web'
 
+	compile "org.springframework.security:spring-security-oauth2-core:$version"
+
 	testCompile 'commons-io:commons-io'
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
 }

@@ -32,7 +32,9 @@ import org.springframework.security.oauth2.resourceserver.authentication.JwtAcce
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenResolver;
+import org.springframework.security.oauth2.resourceserver.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.security.Key;
@@ -159,14 +161,17 @@ public class ResourceServerConfigurer {
 		http
 				.addFilterAfter(oauthResourceAuthenticationFilter(),
 						BasicAuthenticationFilter.class)
-				.exceptionHandling()
+						.exceptionHandling()
+						.accessDeniedHandler(bearerTokenAccessDeniedHandler())
 						.authenticationEntryPoint(bearerTokenAuthenticationEntryPoint()).and()
 						.authorizeRequests()
 								.anyRequest().authenticated().and()
 								.csrf().disable();
 
 		//TODO find better way to register this; the other configurers don't appear to do it this way
-		this.beanFactory.registerSingleton("oauth2", oauth2());
+		if ( !this.beanFactory.containsBean("oauth2") ) {
+			this.beanFactory.registerSingleton("oauth2", oauth2());
+		}
 	}
 
 	private OAuth2Expressions oauth2() {
@@ -206,5 +211,9 @@ public class ResourceServerConfigurer {
 
 	private AuthenticationEntryPoint bearerTokenAuthenticationEntryPoint() {
 		return new BearerTokenAuthenticationEntryPoint();
+	}
+
+	private AccessDeniedHandler bearerTokenAccessDeniedHandler() {
+		return new BearerTokenAccessDeniedHandler();
 	}
 }

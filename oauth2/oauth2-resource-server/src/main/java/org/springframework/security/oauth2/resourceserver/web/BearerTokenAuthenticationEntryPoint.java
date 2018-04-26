@@ -16,19 +16,19 @@
 
 package org.springframework.security.oauth2.resourceserver.web;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.resourceserver.BearerTokenAuthenticationException;
 import org.springframework.security.oauth2.resourceserver.BearerTokenError;
+import org.springframework.security.oauth2.resourceserver.BearerTokenErrorHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.util.Assert;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * An {@link AuthenticationEntryPoint} implementation used to commence authentication of protected resource requests
@@ -46,44 +46,37 @@ import java.util.stream.Collectors;
  */
 public class BearerTokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-	private String realmName;
+	private BearerTokenErrorHandler handler = new BearerTokenErrorHandler();
 
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException {
-		HttpStatus httpStatus;
-		Map<String, String> authParamAttributes = new LinkedHashMap<>();
-		if (this.realmName != null) {
-			authParamAttributes.put("realm", this.realmName);
-		}
 		if (authException instanceof BearerTokenAuthenticationException) {
+
 			BearerTokenError error = ((BearerTokenAuthenticationException) authException).getError();
-			httpStatus = error.getHttpStatus();
-			authParamAttributes.put("error", error.getErrorCode());
-			String description = error.getDescription();
-			if (description != null) {
-				authParamAttributes.put("error_description", description);
-			}
-			String uri = error.getUri();
-			if (uri != null) {
-				authParamAttributes.put("error_uri", uri);
-			}
-			String scope = error.getScope();
-			if (scope != null) {
-				authParamAttributes.put("scope", scope);
-			}
+
+			this.handler.handle(
+					request,
+					response,
+					error.getHttpStatus(), error.getErrorCode(),
+					error.getDescription(), error.getUri(), error.getScope());
+		} else if (authException instanceof OAuth2AuthenticationException) {
+
+			OAuth2Error error = ((OAuth2AuthenticationException) authException).getError();
+
+			this.handler.handle(
+					request,
+					response,
+					HttpStatus.UNAUTHORIZED, error.getErrorCode(),
+					error.getDescription(), error.getUri(), null);
+		} else {
+			this.handler.handle(request, response, HttpStatus.UNAUTHORIZED);
 		}
-		else {
-			httpStatus = HttpStatus.UNAUTHORIZED;
-		}
-		String wwwAuthenticate = "Bearer";
-		if (!authParamAttributes.isEmpty()) {
-			wwwAuthenticate += authParamAttributes.entrySet().stream()
-					.map(attribute -> attribute.getKey() + "=\"" + attribute.getValue() + "\"")
-					.collect(Collectors.joining(", ", " ", ""));
-		}
-		response.addHeader(HttpHeaders.WWW_AUTHENTICATE, wwwAuthenticate);
-		response.sendError(httpStatus.value(), httpStatus.getReasonPhrase());
+	}
+
+	public void setBearerTokenErrorHandler(BearerTokenErrorHandler handler) {
+		Assert.notNull(handler, "handler cannot be null");
+		this.handler = handler;
 	}
 
 	/**
@@ -91,7 +84,6 @@ public class BearerTokenAuthenticationEntryPoint implements AuthenticationEntryP
 	 * @param realmName the realm name
 	 */
 	public void setRealmName(String realmName) {
-		this.realmName = realmName;
+		this.handler.setRealmName(realmName);
 	}
-
 }
