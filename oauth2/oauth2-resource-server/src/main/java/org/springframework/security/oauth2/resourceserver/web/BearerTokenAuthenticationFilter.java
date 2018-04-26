@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.resourceserver.BearerTokenAuthenticationException;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -74,7 +75,14 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 
 		final boolean debug = this.logger.isDebugEnabled();
 
-		String token = this.bearerTokenResolver.resolve(request);
+		String token;
+
+		try {
+			token = this.bearerTokenResolver.resolve(request);
+		} catch ( BearerTokenAuthenticationException invalid ) {
+			this.authenticationEntryPoint.commence(request, response, invalid);
+			return;
+		}
 
 		if (token == null) {
 			filterChain.doFilter(request, response);

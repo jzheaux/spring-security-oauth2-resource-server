@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -29,17 +28,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
 public class MessagesApplicationTests {
-
-	@Autowired
-	MockMvc mvc;
 
 	@Autowired
 	TestRestTemplate rest;
@@ -106,6 +100,9 @@ public class MessagesApplicationTests {
 	public void readWhenNoAuthorizationHeaderThenRequestIsUnauthorized() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", null, 1L);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getHeaders().get("WWW-Authenticate"))
+				.isNotNull()
+				.contains("Bearer");
 	}
 
 	@Test
@@ -113,12 +110,40 @@ public class MessagesApplicationTests {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", null, toSave);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getHeaders().get("WWW-Authenticate"))
+				.isNotNull()
+				.contains("Bearer");
+	}
+
+	@Test
+	public void readWhenAuthorizationHeaderIsMalformedThenRequestIsBadRequest() {
+		ResponseEntity<Message> response = getForMessage("/messages/{id}", "a\"malformed\"token", 1L);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(response.getHeaders().get("WWW-Authenticate"))
+				.isNotNull()
+				.contains("Bearer error=\"invalid_request\"");
+	}
+
+	@Test
+	public void writeWhenAuthorizationHeaderIsMalformedThenRequestIsBadRequest() {
+		Message toSave = new Message("New");
+		ResponseEntity<Message> response = postForMessage("/messages", "a\"malformed\"token", toSave);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(response.getHeaders().get("WWW-Authenticate"))
+				.isNotNull()
+				.contains("Bearer error=\"invalid_request\"");
 	}
 
 	@Test
 	public void readWhenBadAuthorizationHeaderThenRequestIsForbidden() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", this.messageWriteAuthority, 1L);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(response.getHeaders().get("WWW-Authenticate"))
+				.isNotNull()
+				.contains("Bearer error=\"insufficient_scope\", " +
+						"error_description=\"Resource requires any or all of these scopes [message.read]\", " +
+						"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
+						"scope=\"message.read\"");
 	}
 
 	@Test
@@ -126,8 +151,13 @@ public class MessagesApplicationTests {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", this.messageReadAuthority, toSave);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(response.getHeaders().get("WWW-Authenticate"))
+				.isNotNull()
+				.contains("Bearer error=\"insufficient_scope\", " +
+						"error_description=\"Resource requires any or all of these scopes [message.write]\", " +
+						"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
+						"scope=\"message.write\"");
 	}
-
 
 	protected ResponseEntity<Message> getForMessage(String uri, String token, Long id) {
 		HttpHeaders headers = new HttpHeaders();
