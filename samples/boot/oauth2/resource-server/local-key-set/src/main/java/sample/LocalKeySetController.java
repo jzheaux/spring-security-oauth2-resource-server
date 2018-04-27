@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Josh Cummings
  */
 @RestController
-public class OkController {
+public class LocalKeySetController {
 
 	@GetMapping("/ok")
 	@PreAuthorize("@oauth2.hasScope(authentication, 'ok')")

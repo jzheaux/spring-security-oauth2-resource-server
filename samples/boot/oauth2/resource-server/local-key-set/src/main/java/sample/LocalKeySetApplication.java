@@ -24,23 +24,24 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 
 import java.security.PublicKey;
+import java.util.Map;
 
 /**
  * @author Josh Cummings
  */
 @SpringBootApplication
-public class MessagesApplication {
+public class LocalKeySetApplication {
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		@Autowired
-		PublicKey verify;
+		Map<String, PublicKey> verify;
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
 			resourceServer(http)
-					.jwt().signature().key("foo", this.verify);
+					.jwt().signature().keys(this.verify);
 		}
 
 		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
@@ -49,6 +50,6 @@ public class MessagesApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(MessagesApplication.class, args);
+		SpringApplication.run(LocalKeySetApplication.class, args);
 	}
 }

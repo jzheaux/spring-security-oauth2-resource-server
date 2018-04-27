@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Josh Cummings
  */
 @RestController
-public class OkController {
+public class SimpleController {
 
 	@GetMapping("/ok")
-	@PreAuthorize("@custom.customPermission(authentication, 'ok')")
+	@PreAuthorize("@oauth2.hasScope(authentication, 'ok')")
 	public String ok() {
 		return "ok";
 	}

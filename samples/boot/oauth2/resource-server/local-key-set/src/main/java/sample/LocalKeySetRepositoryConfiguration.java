@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Configuration
-public class KeyRepositoryConfiguration {
+public class LocalKeySetRepositoryConfiguration {
 
 	@Bean
 	public Map<String, KeyPair> sign() throws Exception {

@@ -27,7 +27,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
 @Component
-public class KeyRepositoryConfiguration implements BeanFactoryAware {
+public class CustomExpressionsKeyRepositoryConfiguration implements BeanFactoryAware {
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
