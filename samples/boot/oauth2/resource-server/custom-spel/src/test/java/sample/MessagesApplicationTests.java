@@ -27,7 +27,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.util.Arrays;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,7 +47,7 @@ public class MessagesApplicationTests {
 	MockMvc mockMvc;
 
 	@Autowired
-	KeyPair keyPair;
+	PrivateKey sign;
 
 	@Test
 	public void performWhenProperAuthorizationHeaderThenAllow()
@@ -55,7 +55,7 @@ public class MessagesApplicationTests {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim(JwtClaimNames.ISS, "https://myhost")
-				.sign("123", keyPair.getPrivate())
+				.sign("foo", sign)
 				.build();
 
 		this.mockMvc.perform(get("/ok")
@@ -65,7 +65,7 @@ public class MessagesApplicationTests {
 
 		token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim("scp", Arrays.asList("ok"))
-				.sign("123", keyPair.getPrivate())
+				.sign("foo", sign)
 				.build();
 
 		this.mockMvc.perform(get("/ok")
@@ -87,7 +87,7 @@ public class MessagesApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.sign("123", keyPair.getPrivate())
+				.sign("foo", sign)
 				.build();
 
 		this.mockMvc.perform(get("/ok")

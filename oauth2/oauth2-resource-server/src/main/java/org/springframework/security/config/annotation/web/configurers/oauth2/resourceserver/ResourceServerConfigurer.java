@@ -15,17 +15,23 @@
  */
 package org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoderLocalKeySupport;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoderLocalKeySupport;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
@@ -60,15 +66,15 @@ import java.util.Map;
  *
  * @author Josh Cummings
  */
-public class ResourceServerConfigurer {
-
-	private ConfigurableBeanFactory beanFactory;
+public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> extends
+		AbstractHttpConfigurer<ResourceServerConfigurer<H>, H> {
 
 	private BearerTokenResolver resolver;
 	private JwtAccessTokenFormatConfigurer jwtAccessTokenFormatConfigurer;
 
-	public ResourceServerConfigurer(ConfigurableBeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
+	public ResourceServerConfigurer(SessionManagementConfigurer<H> sessionManagement) {
+		//TODO: Take this out of the constructor
+		sessionManagement.sessionCreationPolicy(SessionCreationPolicy.NEVER);
 	}
 
 	public ResourceServerConfigurer bearerTokenResolver(BearerTokenResolver resolver) {
@@ -158,23 +164,47 @@ public class ResourceServerConfigurer {
 		}
 	}
 
-	public void apply(HttpSecurity http) throws Exception {
+	@Override
+	public void init(H http) throws Exception {
+		/*
+			TODO: Based on the description in SecurityConfigurer, I believe this is incorrect;
+			however if I place the same code in configure, then the dependent beans seem to already
+			have been configured. This way works, but it likely doesn't play nicely with other
+			configurers.
+		 */
+
+		exceptionHandling(http)
+				.accessDeniedHandler(bearerTokenAccessDeniedHandler())
+				.authenticationEntryPoint(bearerTokenAuthenticationEntryPoint());
+
+		csrf(http).disable();
+	}
+
+	@Override
+	public void configure(H http) throws Exception {
 		http
 				.addFilterAfter(oauthResourceAuthenticationFilter(),
-						BasicAuthenticationFilter.class)
-				.sessionManagement()
-						.sessionCreationPolicy(SessionCreationPolicy.NEVER).and()
-				.exceptionHandling()
-						.accessDeniedHandler(bearerTokenAccessDeniedHandler())
-						.authenticationEntryPoint(bearerTokenAuthenticationEntryPoint()).and()
-				.authorizeRequests()
-						.anyRequest().authenticated().and()
-						.csrf().disable();
+						BasicAuthenticationFilter.class);
 
-		//TODO find better way to register this; the other configurers don't appear to do it this way
-		if ( !this.beanFactory.containsBean("oauth2") ) {
-			this.beanFactory.registerSingleton("oauth2", oauth2());
+		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+		if ( BeanFactoryUtils.beansOfTypeIncludingAncestors(context, OAuth2Expressions.class).isEmpty() ) {
+			if ( context instanceof ConfigurableApplicationContext ) {
+				((ConfigurableApplicationContext) context).getBeanFactory()
+						.registerSingleton("oauth2", oauth2());
+			}
 		}
+	}
+
+	private SessionManagementConfigurer<H> sessionManagement(H http) {
+		return http.getConfigurer(SessionManagementConfigurer.class);
+	}
+
+	private ExceptionHandlingConfigurer<H> exceptionHandling(H http) {
+		return http.getConfigurer(ExceptionHandlingConfigurer.class);
+	}
+
+	private CsrfConfigurer<H> csrf(H http) {
+		return http.getConfigurer(CsrfConfigurer.class);
 	}
 
 	private OAuth2Expressions oauth2() {

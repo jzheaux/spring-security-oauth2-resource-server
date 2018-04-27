@@ -44,13 +44,13 @@ public class MessagesApplicationTests {
 	MockMvc mockMvc;
 
 	@Autowired
-	Map<String, KeyPair> keyPairs;
+	Map<String, KeyPair> sign;
 
 	@Test
 	public void performWhenProperAuthorizationHeaderThenAllow()
 		throws Exception {
 
-		Map.Entry<String, KeyPair> key = keyPairs.entrySet().iterator().next();
+		Map.Entry<String, KeyPair> key = sign.entrySet().iterator().next();
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.scope("ok")
@@ -75,7 +75,7 @@ public class MessagesApplicationTests {
 	public void performWhenInsufficientScopeThenForbidden()
 		throws Exception {
 
-		Map.Entry<String, KeyPair> key = keyPairs.entrySet().iterator().next();
+		Map.Entry<String, KeyPair> key = sign.entrySet().iterator().next();
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.sign(key.getKey(), key.getValue().getPrivate())

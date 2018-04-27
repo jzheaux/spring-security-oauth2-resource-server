@@ -19,10 +19,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -35,30 +31,19 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import java.io.InputStream;
 
 @SpringBootApplication
-public class MessagesApplication implements BeanFactoryAware {
-
-	private ConfigurableBeanFactory beanFactory;
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if ( beanFactory instanceof ConfigurableBeanFactory ) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-		}
-	}
+public class MessagesApplication {
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
-			resourceServer()
-					.jwt(jwtDecoder())
-
-				.and().apply(http);
+			resourceServer(http)
+					.jwt(jwtDecoder());
 		}
 
-		protected ResourceServerConfigurer resourceServer() {
-			return new ResourceServerConfigurer(MessagesApplication.this.beanFactory);
+		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer(http.sessionManagement()));
 		}
 
 	}

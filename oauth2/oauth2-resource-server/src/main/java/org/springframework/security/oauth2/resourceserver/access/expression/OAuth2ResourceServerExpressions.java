@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * A class for evaluating SpEL expressions based on OAuth2 Authentication tokens.
@@ -55,7 +54,7 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 	}
 
 	@Override
-	public Set<String> scopes(Authentication authentication) {
+	public Collection<String> scopes(Authentication authentication) {
 		return scope(authentication).getScope(scopeAttributeName(authentication));
 	}
 

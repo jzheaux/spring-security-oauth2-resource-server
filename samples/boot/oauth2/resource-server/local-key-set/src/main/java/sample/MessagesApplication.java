@@ -15,75 +15,38 @@
  */
 package sample;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.util.HashMap;
+import java.security.PublicKey;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Josh Cummings
  */
 @SpringBootApplication
-public class MessagesApplication implements BeanFactoryAware {
-
-	private ConfigurableBeanFactory beanFactory;
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if ( beanFactory instanceof ConfigurableBeanFactory ) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-		}
-	}
+public class MessagesApplication {
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+		@Autowired
+		Map<String, PublicKey> verify;
+
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
-			Map<String, Key> keys = keyPairs().entrySet().stream().collect(Collectors.toMap(
-					Map.Entry::getKey,
-					entry -> entry.getValue().getPublic()));
-
-			resourceServer()
-					.jwt().signature().keys(keys)
-
-				.and().apply(http);
+			resourceServer(http)
+					.jwt().signature().keys(this.verify);
 		}
 
-		protected ResourceServerConfigurer resourceServer() {
-			return new ResourceServerConfigurer(MessagesApplication.this.beanFactory);
+		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer(http.sessionManagement()));
 		}
-	}
-
-	@Bean
-	Map<String, KeyPair> keyPairs() {
-		Map<String, KeyPair> keyPairs = new HashMap<>();
-
-		try {
-			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-			generator.initialize(2048);
-
-			keyPairs.put("foo", generator.generateKeyPair());
-			keyPairs.put("bar", generator.generateKeyPair());
-		} catch ( Exception e ) {
-			throw new IllegalArgumentException(e);
-		}
-
-		return keyPairs;
 	}
 
 	public static void main(String[] args) {

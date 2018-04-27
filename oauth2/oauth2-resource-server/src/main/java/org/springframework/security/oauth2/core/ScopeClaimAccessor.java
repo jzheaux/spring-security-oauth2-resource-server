@@ -15,9 +15,8 @@
  */
 package org.springframework.security.oauth2.core;
 
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +50,7 @@ public interface ScopeClaimAccessor extends ClaimAccessor {
 		return Stream.of(asString.split(delimiter)).collect(Collectors.toList());
 	}
 
-	default Set<String> getScope(String scopeClaimName) {
-		return new LinkedHashSet<>(this.getClaimAsStringList(scopeClaimName, " "));
+	default Collection<String> getScope(String scopeClaimName) {
+		return this.getClaimAsStringList(scopeClaimName, " ");
 	}
 }

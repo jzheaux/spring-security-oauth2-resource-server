@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.security.KeyPair;
+import java.security.PrivateKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,7 +47,7 @@ public class MessagesApplicationTests {
 	MockMvc mockMvc;
 
 	@Autowired
-	KeyPair keyPair;
+	PrivateKey priv;
 
 	@Test
 	public void performWhenProperAuthorizationHeaderThenAllow()
@@ -55,7 +55,7 @@ public class MessagesApplicationTests {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim("scp", "ok")
-				.sign("123", keyPair.getPrivate())
+				.sign("foo", this.priv)
 				.build();
 
 		this.mockMvc.perform(get("/ok")
@@ -70,7 +70,7 @@ public class MessagesApplicationTests {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim("scp", "ok")
-				.sign("123", keyPair.getPrivate())
+				.sign("foo", this.priv)
 				.build();
 
 		MvcResult result =
@@ -94,7 +94,7 @@ public class MessagesApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.sign("123", keyPair.getPrivate())
+				.sign("foo", this.priv)
 				.build();
 
 		this.mockMvc.perform(get("/ok")

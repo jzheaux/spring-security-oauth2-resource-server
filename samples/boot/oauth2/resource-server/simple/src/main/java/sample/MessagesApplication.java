@@ -15,60 +15,36 @@
  */
 package sample;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 
 /**
  * @author Josh Cummings
  */
 @SpringBootApplication
-public class MessagesApplication implements BeanFactoryAware {
-
-	private ConfigurableBeanFactory beanFactory;
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if ( beanFactory instanceof ConfigurableBeanFactory ) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
-		}
-	}
+public class MessagesApplication {
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+		@Autowired
+		PublicKey verify;
+
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
-			resourceServer()
-					.jwt().signature().key("123", keyPair().getPublic())
-
-				.and().apply(http);
+			resourceServer(http)
+					.jwt().signature().key("foo", this.verify);
 		}
 
-		protected ResourceServerConfigurer resourceServer() {
-			return new ResourceServerConfigurer(MessagesApplication.this.beanFactory);
-		}
-	}
-
-	@Bean
-	KeyPair keyPair() {
-		try {
-			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-			generator.initialize(2048);
-			return generator.generateKeyPair();
-		} catch ( Exception e ) {
-			throw new IllegalArgumentException(e);
+		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer(http.sessionManagement()));
 		}
 	}
 
