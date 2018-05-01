@@ -28,6 +28,7 @@ import org.springframework.security.config.annotation.web.configurers.ExceptionH
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
@@ -44,8 +45,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.Key;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -123,30 +125,43 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	public class NeedsSignatureJwtAccessTokenFormatConfigurer
 		extends JwtAccessTokenFormatConfigurer {
 
+		protected String algorithm = JwsAlgorithms.RS256;
+
+		public NeedsSignatureJwtAccessTokenFormatConfigurer algorithm(String algorithm) {
+			this.algorithm = algorithm;
+			return this;
+		}
+
 		public SignatureVerificationConfigurer signature() {
 			return new SignatureVerificationConfigurer(this);
 		}
 	}
 
 	public class SignatureVerificationConfigurer {
-		private JwtAccessTokenFormatConfigurer parent;
+		private NeedsSignatureJwtAccessTokenFormatConfigurer parent;
 
-		public SignatureVerificationConfigurer(JwtAccessTokenFormatConfigurer parent) {
+		public SignatureVerificationConfigurer(NeedsSignatureJwtAccessTokenFormatConfigurer parent) {
 			this.parent = parent;
 		}
 
-		public JwtAccessTokenFormatConfigurer keys(String uri) {
-			this.parent.jwtDecoder.decoder(new NimbusJwtDecoderJwkSupport(uri));
+		public JwtAccessTokenFormatConfigurer keys(UrlConfigurer configurer) {
+			this.parent.jwtDecoder.decoder(
+					new NimbusJwtDecoderJwkSupport(configurer.url.toString(), this.parent.algorithm));
+
 			return this.parent;
 		}
 
 		public JwtAccessTokenFormatConfigurer keys(Map<String, Key> keys) {
-			this.parent.jwtDecoder.decoder(new NimbusJwtDecoderLocalKeySupport(keys));
+			this.parent.jwtDecoder.decoder(
+					new NimbusJwtDecoderLocalKeySupport(keys, this.parent.algorithm));
+
 			return this.parent;
 		}
 
-		public JwtAccessTokenFormatConfigurer key(String keyId, PublicKey key) {
-			this.parent.jwtDecoder.decoder(new NimbusJwtDecoderLocalKeySupport(keyId, key));
+		public JwtAccessTokenFormatConfigurer key(String keyId, Key key) {
+			this.parent.jwtDecoder.decoder(
+					new NimbusJwtDecoderLocalKeySupport(keyId, key, this.parent.algorithm));
+
 			return this.parent;
 		}
 	}
@@ -161,6 +176,32 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 
 		public JwtDecoder decoder() {
 			return this.jwtDecoder;
+		}
+	}
+
+	public static class UrlConfigurer {
+		URL url;
+		Long readTimeout;
+		Long connectTimeout;
+
+		public static UrlConfigurer url(String location) {
+			UrlConfigurer configurer = new UrlConfigurer();
+			try {
+				configurer.url = new URL(location);
+			} catch ( MalformedURLException malformed ) {
+				throw new IllegalArgumentException(malformed);
+			}
+			return configurer;
+		}
+
+		public UrlConfigurer readTimeout(Long readTimeout) {
+			this.readTimeout = readTimeout;
+			return this;
+		}
+
+		public UrlConfigurer connectTimeout(Long connectTimeout) {
+			this.connectTimeout = connectTimeout;
+			return this;
 		}
 	}
 

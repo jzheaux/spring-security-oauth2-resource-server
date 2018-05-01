@@ -69,7 +69,7 @@ public class ResourceServerConfigurerTests {
 
 		this.register(WebServerConfig.class, RsaConfig.class);
 
-		JwkSetBuilder good = JwkSetBuilder.withRsa("good");
+		JwkSetBuilder good = JwkSetBuilder.empty().withRsa("good");
 
 		String authority = JwsBuilder.withAlgorithm("RS256")
 				.expiresAt(Instant.now().plus(1, ChronoUnit.HOURS))
@@ -90,8 +90,8 @@ public class ResourceServerConfigurerTests {
 
 		this.register(WebServerConfig.class, RsaConfig.class);
 
-		JwkSetBuilder bad = JwkSetBuilder.withRsa("bad");
-		JwkSetBuilder good = JwkSetBuilder.withRsa("good");
+		JwkSetBuilder bad = JwkSetBuilder.empty().withRsa("bad");
+		JwkSetBuilder good = JwkSetBuilder.empty().withRsa("good");
 
 		String authority = JwsBuilder.withAlgorithm("RS256").signWithAny(bad).build();
 
@@ -110,7 +110,7 @@ public class ResourceServerConfigurerTests {
 		this.register(WebServerConfig.class, RsaConfig.class);
 
 		JwkSetBuilder empty = JwkSetBuilder.empty();
-		JwkSetBuilder good = JwkSetBuilder.withRsa("good");
+		JwkSetBuilder good = JwkSetBuilder.empty().withRsa("good");
 
 		String authority = JwsBuilder.withAlgorithm("RS256").signWithAny(good).build();
 
@@ -158,7 +158,7 @@ public class ResourceServerConfigurerTests {
 
 		this.register(WebServerConfig.class, EcConfig.class);
 
-		JwkSetBuilder good = JwkSetBuilder.withEc("good");
+		JwkSetBuilder good = JwkSetBuilder.empty().withEc("good");
 
 		String authority = JwsBuilder.withAlgorithm("ES512")
 				.expiresAt(Instant.now().plus(1, ChronoUnit.HOURS))

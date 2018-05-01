@@ -59,9 +59,7 @@ public class JwkSetBuilder {
 	 * @param keyId
 	 * @return
 	 */
-	public static JwkSetBuilder withEc(String keyId) {
-		JwkSetBuilder set = new JwkSetBuilder();
-
+	public JwkSetBuilder withEc(String keyId) {
 		try {
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
 			generator.initialize(521); // yes, 521
@@ -72,8 +70,8 @@ public class JwkSetBuilder {
 					.keyID(keyId)
 					.build();
 
-			set.jwks.put(keyId, key);
-			return set;
+			this.jwks.put(keyId, key);
+			return this;
 		} catch ( NoSuchAlgorithmException ecMissing ) {
 			throw new IllegalStateException(ecMissing);
 		}
@@ -85,9 +83,7 @@ public class JwkSetBuilder {
 	 * @param keyId
 	 * @return
 	 */
-	public static JwkSetBuilder withRsa(String keyId) {
-		JwkSetBuilder set = new JwkSetBuilder();
-
+	public JwkSetBuilder withRsa(String keyId) {
 		try {
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 			generator.initialize(2048);
@@ -98,9 +94,9 @@ public class JwkSetBuilder {
 					.keyID(keyId)
 					.build();
 
-			set.jwks.put(keyId, key);
+			this.jwks.put(keyId, key);
 
-			return set;
+			return this;
 		} catch ( NoSuchAlgorithmException rsaMissing ) {
 			throw new IllegalStateException(rsaMissing);
 		}
