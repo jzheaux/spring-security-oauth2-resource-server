@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Example configuration:
@@ -74,9 +75,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	private BearerTokenResolver resolver;
 	private JwtAccessTokenFormatConfigurer jwtAccessTokenFormatConfigurer;
 
-	public ResourceServerConfigurer(SessionManagementConfigurer<H> sessionManagement) {
-		//TODO: Take this out of the constructor
-		sessionManagement.sessionCreationPolicy(SessionCreationPolicy.NEVER);
+	public ResourceServerConfigurer() {
 	}
 
 	public ResourceServerConfigurer bearerTokenResolver(BearerTokenResolver resolver) {
@@ -206,29 +205,78 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	}
 
 	@Override
+	public void setBuilder(H builder) {
+		super.setBuilder(builder);
+
+		/*
+			TODO: This still isn't ideal since now it depends on the order in
+			which the DSL methods are called. For example, if
+			http.sessionManagement().sessionCreationPolicy is called by the user before
+			http.oauth2().resourceServer() is, then this will override the user's
+			configuration.
+
+			We cannot simply set values for SecurityContextRepository and RequestCache
+			because SessionManagementConfigurer won't override them with the user's
+			configs (checks for null before setting).
+		 */
+		sessionManagement(builder).sessionCreationPolicy(SessionCreationPolicy.NEVER);
+
+	}
+
+	@Override
 	public void init(H http) throws Exception {
 		/*
 			TODO: Based on the description in SecurityConfigurer, I believe this is incorrect;
 			however if I place the same code in configure, then the dependent beans seem to already
 			have been configured. This way works, but it likely doesn't play nicely with other
 			configurers.
+
+			See my notes below that point out various challenges.
 		 */
 
+		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+
 		exceptionHandling(http)
-				.accessDeniedHandler(bearerTokenAccessDeniedHandler())
-				.authenticationEntryPoint(bearerTokenAuthenticationEntryPoint());
+				.defaultAuthenticationEntryPointFor(
+						bearerTokenAuthenticationEntryPoint(),
+						(request) -> Optional.ofNullable(request.getHeader("Authorization"))
+										.map(authorization -> authorization.startsWith("Bearer "))
+										.orElse(false));
+
+		/*
+		    TODO: There isn't a shared object for AccessDeniedHandler nor is there the same
+		    default/delegate pattern that exceptionHandling supports for entry points. AFAICT,
+		    I cannot see whether or not the user has specified an access denied handler,
+		    except by way of a @Bean.
+		 */
+
+		if (!containsBean(context, AccessDeniedHandler.class)) {
+			exceptionHandling(http).accessDeniedHandler(bearerTokenAccessDeniedHandler());
+		}
+
+		/*
+		   TODO: Not sure how to determine whether or not csrf was specified by the user
+		   We have some surrogates like checking for CsrfTokenRepository, but I don't see a way
+		   to know, say, that http.csrf() was invoked by the user since this is invoked
+		   automatically in getHttp()
+
+		   Alternatively, I could add certain conditions for when to skip csrf protection,
+		   say when we are able to resolve a bearer token, though I cannot configure
+		   a requireCsrfProtectionMatcher without overridding a user-configured one.
+		 */
 
 		csrf(http).disable();
 	}
 
 	@Override
 	public void configure(H http) throws Exception {
+		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
+
 		http
 				.addFilterAfter(oauthResourceAuthenticationFilter(),
 						BasicAuthenticationFilter.class);
 
-		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
-		if ( BeanFactoryUtils.beansOfTypeIncludingAncestors(context, OAuth2Expressions.class).isEmpty() ) {
+		if ( !containsBean(context, OAuth2Expressions.class) ) {
 			if ( context instanceof ConfigurableApplicationContext ) {
 				((ConfigurableApplicationContext) context).getBeanFactory()
 						.registerSingleton("oauth2", oauth2());
@@ -251,7 +299,6 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	private OAuth2Expressions oauth2() {
 		return new OAuth2ResourceServerExpressions();
 	}
-
 
 	private BearerTokenAuthenticationFilter oauthResourceAuthenticationFilter() {
 		BearerTokenAuthenticationFilter filter =
@@ -289,5 +336,9 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 
 	private AccessDeniedHandler bearerTokenAccessDeniedHandler() {
 		return new BearerTokenAccessDeniedHandler();
+	}
+
+	private boolean containsBean(ApplicationContext context, Class<?> clazz) {
+		return !BeanFactoryUtils.beansOfTypeIncludingAncestors(context, clazz).isEmpty();
 	}
 }

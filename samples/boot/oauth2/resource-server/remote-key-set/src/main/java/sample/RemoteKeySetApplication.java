@@ -47,7 +47,7 @@ public class RemoteKeySetApplication {
 		}
 
 		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer(http.sessionManagement()));
+			return http.apply(new ResourceServerConfigurer());
 		}
 	}
 
