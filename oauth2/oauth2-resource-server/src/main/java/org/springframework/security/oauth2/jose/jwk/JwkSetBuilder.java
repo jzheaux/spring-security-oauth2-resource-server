@@ -20,6 +20,7 @@ import com.nimbusds.jose.jwk.AsymmetricJWK;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.SecretJWK;
 import net.minidev.json.JSONObject;
@@ -68,6 +69,7 @@ public class JwkSetBuilder {
 			ECKey key = new ECKey.Builder(Curve.P_521, ((ECPublicKey) keyPair.getPublic()))
 					.privateKey(keyPair.getPrivate())
 					.keyID(keyId)
+					.keyUse(KeyUse.SIGNATURE)
 					.build();
 
 			this.jwks.put(keyId, key);
@@ -92,6 +94,7 @@ public class JwkSetBuilder {
 			RSAKey key = new RSAKey.Builder((RSAPublicKey) kp.getPublic())
 					.privateKey(kp.getPrivate())
 					.keyID(keyId)
+					.keyUse(KeyUse.SIGNATURE)
 					.build();
 
 			this.jwks.put(keyId, key);

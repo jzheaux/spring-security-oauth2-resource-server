@@ -1,0 +1,16 @@
+apply plugin: 'io.spring.convention.spring-sample-boot'
+
+dependencies {
+	compile project(':spring-security-oauth2-resource-server')
+
+	compile 'org.springframework.security.oauth:spring-security-oauth2:2.3.2.RELEASE'
+	compile 'org.springframework.security:spring-security-jwt:1.0.9.RELEASE'
+
+	compile 'org.springframework.boot:spring-boot-starter-security'
+	compile 'org.springframework.boot:spring-boot-starter-web'
+
+	compile 'com.squareup.okhttp3:mockwebserver'
+
+	testCompile 'commons-io:commons-io'
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
