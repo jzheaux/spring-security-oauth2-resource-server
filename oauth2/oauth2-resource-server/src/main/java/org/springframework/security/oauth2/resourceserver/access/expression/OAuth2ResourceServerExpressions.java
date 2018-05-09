@@ -153,7 +153,7 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 		return () -> attributes(authentication);
 	}
 
-	private Map<String, Object> attributes(Authentication authentication) {
+	protected Map<String, Object> attributes(Authentication authentication) {
 		return token(authentication)
 					.map(token -> token.getTokenAttributes())
 					.orElse(Collections.emptyMap());
