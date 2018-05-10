@@ -149,7 +149,7 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 		return () -> attributes(authentication);
 	}
 
-	private JwtClaimAccessor jwt(Authentication authentication) {
+	protected JwtClaimAccessor jwt(Authentication authentication) {
 		return () -> attributes(authentication);
 	}
 

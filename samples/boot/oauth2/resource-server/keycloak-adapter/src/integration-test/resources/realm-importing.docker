@@ -1,0 +1,13 @@
+FROM jboss/keycloak:4.0.0.Beta2
+
+ADD import-realm.json /opt/jboss/keycloak/
+
+ENV DB_VENDOR=H2
+
+CMD [ \
+    "-b", "0.0.0.0", \
+    "   -Dkeycloak.migration.action=import \
+        -Dkeycloak.migration.provider=singleFile \
+        -Dkeycloak.migration.file=/opt/jboss/keycloak/import-realm.json \
+        -Dkeycloak.migration.strategy=OVERWRITE_EXISTING" \
+]

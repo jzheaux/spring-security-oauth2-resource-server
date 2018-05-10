@@ -1,0 +1,37 @@
+apply plugin: 'io.spring.convention.spring-sample-boot'
+
+sourceSets {
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources.srcDir file('src/integration-test/resources')
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom 'org.keycloak.bom:keycloak-adapter-bom:4.0.0.Beta2'
+	}
+}
+
+dependencies {
+	compile project(':spring-security-oauth2-resource-server')
+
+	compile 'org.springframework.boot:spring-boot-starter-security'
+	compile 'org.springframework.boot:spring-boot-starter-web'
+
+	compile "org.springframework.security:spring-security-oauth2-core:$version"
+
+	compile 'org.keycloak:keycloak-spring-boot-2-starter'
+	compile 'org.keycloak:keycloak-spring-security-adapter'
+
+	compile 'com.squareup.okhttp3:mockwebserver'
+
+	testCompile 'commons-io:commons-io'
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+	integrationTestCompile 'org.testcontainers:testcontainers:1.7.2'
+}
