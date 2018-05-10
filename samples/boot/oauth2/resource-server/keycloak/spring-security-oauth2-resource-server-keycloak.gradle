@@ -1,5 +1,16 @@
 apply plugin: 'io.spring.convention.spring-sample-boot'
 
+sourceSets {
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources.srcDir file('src/integration-test/resources')
+	}
+}
+
 dependencies {
 	compile project(':spring-security-oauth2-resource-server')
 
@@ -12,4 +23,6 @@ dependencies {
 
 	testCompile 'commons-io:commons-io'
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+	integrationTestCompile 'org.testcontainers:testcontainers:1.7.2'
 }

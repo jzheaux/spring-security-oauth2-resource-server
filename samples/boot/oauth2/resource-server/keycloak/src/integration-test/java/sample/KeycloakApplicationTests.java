@@ -18,21 +18,12 @@ package sample;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.Base64;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,20 +37,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class KeycloakApplicationTests {
+public class KeycloakApplicationTests extends AbstractKeycloakITests {
 
 	@Autowired
 	MockMvc mockMvc;
 
-	@Value("${keycloak.tokenEndpoint}") String tokenEndpoint;
-
-	RestTemplate rest = new RestTemplate();
-
-	//-- @Test // -- currently requires Keycloak to be up and configured in a certain way
+	@Test
 	public void performWhenProperAuthorizationHeaderThenAllow()
 		throws Exception {
 
-		String token = this.tokenByResourceOwnerGrant("test", null, "authorized", "password");
+		String token = this.getTokenByResourceOwnerGrant("public-client", "isok", "password");
 
 		this.mockMvc.perform(get("/ok")
 				.header("Authorization", "Bearer " + token))
@@ -67,11 +54,11 @@ public class KeycloakApplicationTests {
 				.andExpect(status().isOk());
 	}
 
-	//-- @Test // -- currently requires Keycloak to be up and configured in a certain way
+	@Test
 	public void performWhenProperAuthorizationHeaderThenNoSessionCreated()
 			throws Exception {
 
-		String token = this.tokenByResourceOwnerGrant("test", null, "authorized", "password");
+		String token = this.getTokenByResourceOwnerGrant("public-client", "isok", "password");
 
 		MvcResult result =
 				this.mockMvc.perform(get("/ok")
@@ -89,11 +76,11 @@ public class KeycloakApplicationTests {
 				.andExpect(status().isUnauthorized());
 	}
 
-	//-- @Test // -- currently requires Keycloak to be up and configured in a certain way
+	@Test
 	public void performWhenInsufficientScopeThenForbidden()
 		throws Exception {
 
-		String token = this.tokenByResourceOwnerGrant("test", null, "unauthorized", "password");
+		String token = this.getTokenByResourceOwnerGrant("public-client", "isnotok", "password");
 
 		this.mockMvc.perform(get("/ok")
 				.header("Authorization", "Bearer " + token))
@@ -105,26 +92,5 @@ public class KeycloakApplicationTests {
 								"scope=\"ok\""));
 	}
 
-	private String tokenByResourceOwnerGrant(
-			String clientId, String clientPassword,
-			String resourceId, String resourcePassword) {
 
-		String authorization = Base64.getEncoder().encodeToString((clientId + ":").getBytes());
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Basic " + authorization);
-
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("grant_type", "password");
-		map.add("username", resourceId);
-		map.add("password", resourcePassword);
-
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-		ResponseEntity<Map> response = this.rest.postForEntity(
-				this.tokenEndpoint,
-				request, Map.class );
-
-		return (String) response.getBody().get("access_token");
-	}
 }

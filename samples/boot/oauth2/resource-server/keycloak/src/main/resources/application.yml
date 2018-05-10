@@ -16,7 +16,7 @@
 #
 
 keycloak.auth-server-url: http://localhost:8080/auth
-keycloak.realm: test
+keycloak.realm: master
 
 keycloak.tokenEndpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token
 keycloak.certsEndpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs
