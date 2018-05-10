@@ -43,7 +43,7 @@ public abstract class AbstractKeycloakITests {
 
 	private RestTemplate rest = new RestTemplate();
 
-	@Value("${keycloak.tokenEndpoint}") String tokenEndpoint;
+	@Value("${spring.boot.oauth2.resourceserver.keycloak.tokenEndpoint}") String tokenEndpoint;
 
 	@BeforeClass
 	public static void setUpClass() {

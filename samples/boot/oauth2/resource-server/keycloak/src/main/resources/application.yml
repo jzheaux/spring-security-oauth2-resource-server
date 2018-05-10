@@ -18,5 +18,5 @@
 keycloak.auth-server-url: http://localhost:8080/auth
 keycloak.realm: master
 
-keycloak.tokenEndpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token
-keycloak.certsEndpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs
+spring.boot.oauth2.resourceserver.keycloak.tokenEndpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token
+spring.boot.oauth2.resourceserver.keycloak.certsEndpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs

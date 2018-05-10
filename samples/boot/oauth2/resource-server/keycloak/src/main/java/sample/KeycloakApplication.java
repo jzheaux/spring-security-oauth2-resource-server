@@ -43,7 +43,7 @@ public class KeycloakApplication {
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Value("${keycloak.certsEndpoint}") String certsEndpoint;
+		@Value("${spring.boot.oauth2.resourceserver.keycloak.certsEndpoint}") String certsEndpoint;
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
