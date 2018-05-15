@@ -15,7 +15,6 @@
  */
 package sample;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,16 +26,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jose.jws.JwsBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.security.PrivateKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class MessagesApplicationTests {
+public class Auth0ApplicationTests {
 
 	@Autowired
 	TestRestTemplate rest;
+
+	@Autowired
+	PrivateKey sign;
 
 	String messageBothAuthority;
 	String messageReadAuthority;
@@ -45,16 +50,26 @@ public class MessagesApplicationTests {
 	@Before
 	public void setUp() throws Exception {
 		this.messageBothAuthority =
-			IOUtils.toString(
-				this.getClass().getClassLoader().getResourceAsStream("message-both"));
+				JwsBuilder.withAlgorithm("RS256")
+						.claim("iss", "rob")
+						.scope("message.read")
+						.scope("message.write")
+						.sign("id", this.sign)
+						.build();
 
 		this.messageReadAuthority =
-			IOUtils.toString(
-				this.getClass().getClassLoader().getResourceAsStream("message-read"));
+				JwsBuilder.withAlgorithm("RS256")
+						.claim("iss", "rob")
+						.scope("message.read")
+						.sign("id", this.sign)
+						.build();
 
 		this.messageWriteAuthority =
-			IOUtils.toString(
-				this.getClass().getClassLoader().getResourceAsStream("message-write"));
+				JwsBuilder.withAlgorithm("RS256")
+						.claim("iss", "rob")
+						.scope("message.write")
+						.sign("id", this.sign)
+						.build();
 	}
 
 	@Test
@@ -102,36 +117,36 @@ public class MessagesApplicationTests {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
-				.contains("Bearer realm=\"oauth2-resource\", error=\"unauthorized\", error_description=\"Full authentication is required to access this resource\"");
+				.contains("Bearer");
 	}
 
 	@Test
-	public void writeWhenNoAuthorizationHeaderThenRequestIsUnauthorized() {
+	public void writeWhenNoAuthorizationHeaderThenRequestIsForbiddenByCsrf() {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", null, toSave);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
-				.contains("Bearer realm=\"oauth2-resource\", error=\"unauthorized\", error_description=\"Full authentication is required to access this resource\"");
+				.contains("Bearer");
 	}
 
 	@Test
 	public void readWhenAuthorizationHeaderIsMalformedThenRequestIsBadRequest() {
 		ResponseEntity<Message> response = getForMessage("/messages/{id}", "a\"malformed\"token", 1L);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
-				.contains("Bearer realm=\"oauth2-resource\", error=\"invalid_token\", error_description=\"The token was expected to have 3 parts, but got 1.\"");
+				.contains("Bearer error=\"invalid_request\"");
 	}
 
 	@Test
 	public void writeWhenAuthorizationHeaderIsMalformedThenRequestIsBadRequest() {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", "a\"malformed\"token", toSave);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
-				.contains("Bearer realm=\"oauth2-resource\", error=\"invalid_token\", error_description=\"The token was expected to have 3 parts, but got 1.\"");
+				.contains("Bearer error=\"invalid_request\"");
 	}
 
 	@Test
@@ -141,7 +156,8 @@ public class MessagesApplicationTests {
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
 				.contains("Bearer error=\"insufficient_scope\", " +
-						"error_description=\"Insufficient scope for this resource\", " +
+						"error_description=\"Resource requires any or all of these scopes [message.read]\", " +
+						"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
 						"scope=\"message.read\"");
 	}
 
@@ -153,7 +169,8 @@ public class MessagesApplicationTests {
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
 				.contains("Bearer error=\"insufficient_scope\", " +
-						"error_description=\"Insufficient scope for this resource\", " +
+						"error_description=\"Resource requires any or all of these scopes [message.write]\", " +
+						"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
 						"scope=\"message.write\"");
 	}
 

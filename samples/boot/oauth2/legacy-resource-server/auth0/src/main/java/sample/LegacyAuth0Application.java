@@ -18,7 +18,7 @@ package sample;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.RSAKeyProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -35,11 +35,12 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
-import java.io.InputStream;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 @SpringBootApplication
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class MessagesApplication {
+public class LegacyAuth0Application {
 
 	@Bean
 	public MethodSecurityExpressionHandler expressionHandler() {
@@ -48,13 +49,9 @@ public class MessagesApplication {
 
 	@EnableResourceServer
 	class WebSecurityConfig extends ResourceServerConfigurerAdapter {
-		@Bean
-		JwtAccessTokenConverter converter() {
-			InputStream is = this.getClass().getClassLoader().getResourceAsStream("id_rsa.pub");
-			RSAKeyProvider provider = new PemParsingPublicKeyOnlyRSAKeyProvider(is);
-			JWTVerifier verifier = JWT.require(Algorithm.RSA256(provider)).withIssuer("rob").build();
-			return new Auth0JwtAccessTokenConverter(verifier);
-		}
+
+		@Autowired
+		PublicKey verify;
 
 		@Bean
 		AuthenticationEntryPoint entryPoint() {
@@ -83,11 +80,18 @@ public class MessagesApplication {
 			resources.tokenStore(store);
 			resources.authenticationEntryPoint(entryPoint());
 		}
+
+		@Bean
+		JwtAccessTokenConverter converter() {
+			JWTVerifier verifier =
+					JWT.require(Algorithm.RSA256((RSAPublicKey) this.verify, null))
+							.withIssuer("rob").build();
+
+			return new LegacyAuth0JwtAccessTokenConverter(verifier);
+		}
 	}
 
-
-
 	public static void main(String[] args) {
-		SpringApplication.run(MessagesApplication.class, args);
+		SpringApplication.run(LegacyAuth0Application.class, args);
 	}
 }

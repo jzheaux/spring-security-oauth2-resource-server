@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 /**
  * @author Josh Cummings
  */
-public class Auth0JwtAccessTokenConverter extends JwtAccessTokenConverter {
+public class LegacyAuth0JwtAccessTokenConverter extends JwtAccessTokenConverter {
 	private JWTVerifier verifier;
 
-	public Auth0JwtAccessTokenConverter(JWTVerifier verifier) {
+	public LegacyAuth0JwtAccessTokenConverter(JWTVerifier verifier) {
 		this.verifier = verifier;
 	}
 

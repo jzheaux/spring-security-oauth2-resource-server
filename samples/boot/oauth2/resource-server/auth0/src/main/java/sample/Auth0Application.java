@@ -18,7 +18,7 @@ package sample;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.RSAKeyProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -28,13 +28,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
-import java.io.InputStream;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 @SpringBootApplication
-public class MessagesApplication {
-
+public class Auth0Application {
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+		@Autowired
+		PublicKey verify;
+
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
@@ -46,17 +49,18 @@ public class MessagesApplication {
 			return http.apply(new ResourceServerConfigurer());
 		}
 
+		@Bean
+		JwtDecoder jwtDecoder() {
+			JWTVerifier verifier = JWT.require(Algorithm.RSA256((RSAPublicKey) this.verify, null))
+					.withIssuer("rob").build();
+
+			return new Auth0JwtDecoder(verifier);
+		}
 	}
 
-	@Bean
-	JwtDecoder jwtDecoder() {
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream("id_rsa.pub");
-		RSAKeyProvider provider = new PemParsingPublicKeyOnlyRSAKeyProvider(is);
-		JWTVerifier verifier = JWT.require(Algorithm.RSA256(provider)).withIssuer("rob").build();
-		return new Auth0JwtDecoder(verifier);
-	}
+
 
 	public static void main(String[] args) {
-		SpringApplication.run(MessagesApplication.class, args);
+		SpringApplication.run(Auth0Application.class, args);
 	}
 }
