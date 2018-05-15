@@ -1,0 +1,53 @@
+#
+# Copyright 2002-2018 the original author or authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+
+server:
+  port: 8082
+
+kc:
+  base-url: http://localhost:8080/auth
+  realm: master
+  realm-url: ${kc.base-url}/realms/${kc.realm}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          demo:
+            client-id: app-demo
+            client-name: Demo App
+            client-secret: e3f519b4-0272-4261-9912-8b7453ac4ecd
+            provider: keycloak
+            authorization-grant-type: authorization_code
+            scope: openid, profile
+            redirect-uri-template: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            authorization-uri: ${kc.realm-url}/protocol/openid-connect/auth
+            jwk-set-uri: ${kc.realm-url}/protocol/openid-connect/certs
+            token-uri: ${kc.realm-url}/protocol/openid-connect/token
+# would be cool if there was a end-session-uri to propagate logouts
+
+#  User info endpoint not needed since Keycloak uses self-contained value tokens
+#            user-info-uri: ${kc.realm-url}/protocol/openid-connect/userinfo
+            user-name-attribute: preferred_username
+      resourceserver:
+        provider:
+          keycloak:
+            jwk-set-uri: ${kc.realm-url}/protocol/openid-connect/certs
+            token-uri: ${kc.realm-url}/protocol/openid-connect/token

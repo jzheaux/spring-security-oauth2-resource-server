@@ -1,0 +1,29 @@
+apply plugin: 'io.spring.convention.spring-sample-boot'
+
+sourceSets {
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources.srcDir file('src/integration-test/resources')
+	}
+}
+
+dependencies {
+	compile project(':spring-security-oauth2-resource-server')
+
+	compile 'org.springframework.boot:spring-boot-starter-security'
+	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	compile 'org.springframework.boot:spring-boot-starter-web'
+
+	compile "org.springframework.security:spring-security-oauth2-client:$version"
+	compile "org.springframework.security:spring-security-oauth2-core:$version"
+	compile "org.springframework.security:spring-security-oauth2-jose:$version"
+
+	testCompile 'commons-io:commons-io'
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+
+	integrationTestCompile 'org.testcontainers:testcontainers:1.7.2'
+}
