@@ -106,10 +106,10 @@ public class MessagesApplicationTests {
 	}
 
 	@Test
-	public void writeWhenNoAuthorizationHeaderThenRequestIsUnauthorized() {
+	public void writeWhenNoAuthorizationHeaderThenRequestIsForbiddenByCsrf() {
 		Message toSave = new Message("New");
 		ResponseEntity<Message> response = postForMessage("/messages", null, toSave);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 		assertThat(response.getHeaders().get("WWW-Authenticate"))
 				.isNotNull()
 				.contains("Bearer");

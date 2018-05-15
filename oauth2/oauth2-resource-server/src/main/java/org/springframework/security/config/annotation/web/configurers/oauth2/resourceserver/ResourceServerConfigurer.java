@@ -41,10 +41,12 @@ import org.springframework.security.oauth2.resourceserver.authentication.JwtAcce
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenResolver;
+import org.springframework.security.oauth2.resourceserver.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.resourceserver.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -244,6 +246,24 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 
 		ApplicationContext context = http.getSharedObject(ApplicationContext.class);
 
+		/*
+			TODO: Doing bearerTokenResolver this early because the csrf configuration
+			currently needs to also be this early until I figure out how to tell inside
+			configure() whether or not the user has specified his own CSRF RequestMatcher
+		 */
+		if ( this.resolver == null ) {
+			Map<String, BearerTokenResolver> resolvers =
+					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, BearerTokenResolver.class);
+
+			if ( !resolvers.isEmpty() ) {
+				this.resolver = resolvers.values().iterator().next();
+			}
+		}
+
+		if ( this.resolver == null ) {
+			this.resolver = new DefaultBearerTokenResolver();
+		}
+
 		exceptionHandling(http)
 				.defaultAuthenticationEntryPointFor(
 						bearerTokenAuthenticationEntryPoint(),
@@ -267,13 +287,12 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 		   We have some surrogates like checking for CsrfTokenRepository, but I don't see a way
 		   to know, say, that http.csrf() was invoked by the user since this is invoked
 		   automatically in getHttp()
-
-		   Alternatively, I could add certain conditions for when to skip csrf protection,
-		   say when we are able to resolve a bearer token, though I cannot configure
-		   a requireCsrfProtectionMatcher without overridding a user-configured one.
 		*/
 
-		csrf(http).disable();
+		csrf(http).requireCsrfProtectionMatcher(request ->
+			CsrfFilter.DEFAULT_CSRF_MATCHER.matches(request) &&
+					!Optional.ofNullable(request.getHeader("Authorization"))
+							.filter(header -> header.startsWith("Bearer ")).isPresent());
 	}
 
 	@Override
