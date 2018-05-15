@@ -18,14 +18,19 @@ package org.springframework.security.oauth2.resourceserver.authentication;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.ClaimAccessorAuthoritiesExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.Assert;
+
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * An {@link AuthenticationProvider} implementation of the OAuth2 Resource Server Bearer Token when using Jwt-encoding
@@ -44,6 +49,8 @@ import org.springframework.util.Assert;
 public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
 	private final JwtDecoder jwtDecoder;
 	private final JwtAccessTokenVerifier jwtVerifier;
+
+	private ClaimAccessorAuthoritiesExtractor authoritiesExtractor = (jwt) -> Collections.emptyList();
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
 		this(jwtDecoder, new JwtAccessTokenVerifier());
@@ -78,7 +85,11 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 		this.jwtVerifier.verify(jwt);
 
-		JwtAccessTokenAuthenticationToken token = new JwtAccessTokenAuthenticationToken(jwt);
+		Collection<? extends GrantedAuthority> authorities =
+				this.authoritiesExtractor.extractAuthorities(jwt);
+
+		JwtAccessTokenAuthenticationToken token =
+				new JwtAccessTokenAuthenticationToken(jwt, authorities);
 
 		if ( jwt.getClaims().get("scp") != null ) {
 			token.setScopeAttributeName("scp");
@@ -90,5 +101,10 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 	@Override
 	public boolean supports(Class<?> authentication) {
 		return PreAuthenticatedAuthenticationToken.class.isAssignableFrom(authentication);
+	}
+
+	public void setAuthoritiesExtractor(ClaimAccessorAuthoritiesExtractor authoritiesExtractor) {
+		Assert.notNull(authoritiesExtractor, "authoritiesExtractor cannot be null");
+		this.authoritiesExtractor = authoritiesExtractor;
 	}
 }

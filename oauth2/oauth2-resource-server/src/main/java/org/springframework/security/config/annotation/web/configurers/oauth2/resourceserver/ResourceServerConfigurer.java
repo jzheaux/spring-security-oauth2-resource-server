@@ -27,6 +27,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.ClaimAccessorAuthoritiesExtractor;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -51,6 +52,7 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -104,11 +106,17 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	public class JwtAccessTokenFormatConfigurer {
 		protected JwtDecoderConfigurer jwtDecoder = new JwtDecoderConfigurer();
 		private Collection<OAuth2TokenVerifier<Jwt>> verifiers = new ArrayList<>();
+		private ClaimAccessorAuthoritiesExtractor extractor = (jwt) -> Collections.emptyList();
 
 		public JwtAccessTokenFormatConfigurer() {}
 
 		public JwtAccessTokenFormatConfigurer(JwtDecoder decoder) {
 			this.jwtDecoder.decoder(decoder);
+		}
+
+		public JwtAccessTokenFormatConfigurer authoritiesExtractor(ClaimAccessorAuthoritiesExtractor extractor) {
+			this.extractor = extractor;
+			return this;
 		}
 
 		public JwtAccessTokenFormatConfigurer verifiers(OAuth2TokenVerifier<Jwt>... verifiers) {
@@ -263,7 +271,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 		   Alternatively, I could add certain conditions for when to skip csrf protection,
 		   say when we are able to resolve a bearer token, though I cannot configure
 		   a requireCsrfProtectionMatcher without overridding a user-configured one.
-		 */
+		*/
 
 		csrf(http).disable();
 	}
@@ -326,6 +334,8 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			new JwtAccessTokenAuthenticationProvider(
 					this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder(),
 					verifier);
+
+		provider.setAuthoritiesExtractor(this.jwtAccessTokenFormatConfigurer.extractor);
 
 		return provider;
 	}
