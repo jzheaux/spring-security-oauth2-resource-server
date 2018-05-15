@@ -59,9 +59,9 @@ public class KeycloakApplication {
 	}
 
 	@Bean
-	KeycloakClaimAccessorAuthoritiesExtractor keycloakOAuth2TokenAuthoritiesExtractor() {
-		KeycloakClaimAccessorAuthoritiesExtractor extractor =
-				new KeycloakClaimAccessorAuthoritiesExtractor();
+	KeycloakAuthoritiesExtractor keycloakOAuth2TokenAuthoritiesExtractor() {
+		KeycloakAuthoritiesExtractor extractor =
+				new KeycloakAuthoritiesExtractor();
 
 		extractor.setAuthoritiesMapper(authoritiesMapper());
 

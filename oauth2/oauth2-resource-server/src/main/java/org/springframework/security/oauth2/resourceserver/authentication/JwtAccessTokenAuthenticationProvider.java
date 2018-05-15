@@ -22,7 +22,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.core.ClaimAccessorAuthoritiesExtractor;
+import org.springframework.security.oauth2.core.AuthoritiesExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -50,7 +50,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 	private final JwtDecoder jwtDecoder;
 	private final JwtAccessTokenVerifier jwtVerifier;
 
-	private ClaimAccessorAuthoritiesExtractor authoritiesExtractor = (jwt) -> Collections.emptyList();
+	private AuthoritiesExtractor authoritiesExtractor = (authentication) -> Collections.emptyList();
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
 		this(jwtDecoder, new JwtAccessTokenVerifier());
@@ -86,7 +86,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		this.jwtVerifier.verify(jwt);
 
 		Collection<? extends GrantedAuthority> authorities =
-				this.authoritiesExtractor.extractAuthorities(jwt);
+				this.authoritiesExtractor.extractAuthorities(new JwtAccessTokenAuthenticationToken(jwt));
 
 		JwtAccessTokenAuthenticationToken token =
 				new JwtAccessTokenAuthenticationToken(jwt, authorities);
@@ -103,7 +103,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		return PreAuthenticatedAuthenticationToken.class.isAssignableFrom(authentication);
 	}
 
-	public void setAuthoritiesExtractor(ClaimAccessorAuthoritiesExtractor authoritiesExtractor) {
+	public void setAuthoritiesExtractor(AuthoritiesExtractor authoritiesExtractor) {
 		Assert.notNull(authoritiesExtractor, "authoritiesExtractor cannot be null");
 		this.authoritiesExtractor = authoritiesExtractor;
 	}

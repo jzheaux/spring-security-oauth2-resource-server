@@ -27,7 +27,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.core.ClaimAccessorAuthoritiesExtractor;
+import org.springframework.security.oauth2.core.AuthoritiesExtractor;
 import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -108,7 +108,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	public class JwtAccessTokenFormatConfigurer {
 		protected JwtDecoderConfigurer jwtDecoder = new JwtDecoderConfigurer();
 		private Collection<OAuth2TokenVerifier<Jwt>> verifiers = new ArrayList<>();
-		private ClaimAccessorAuthoritiesExtractor extractor = (jwt) -> Collections.emptyList();
+		private AuthoritiesExtractor extractor = (authentication) -> Collections.emptyList();
 
 		public JwtAccessTokenFormatConfigurer() {}
 
@@ -116,7 +116,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			this.jwtDecoder.decoder(decoder);
 		}
 
-		public JwtAccessTokenFormatConfigurer authoritiesExtractor(ClaimAccessorAuthoritiesExtractor extractor) {
+		public JwtAccessTokenFormatConfigurer authoritiesExtractor(AuthoritiesExtractor extractor) {
 			this.extractor = extractor;
 			return this;
 		}

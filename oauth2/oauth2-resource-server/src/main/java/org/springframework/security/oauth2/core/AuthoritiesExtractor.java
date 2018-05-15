@@ -16,10 +16,11 @@
 
 package org.springframework.security.oauth2.core;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
-public interface ClaimAccessorAuthoritiesExtractor {
-	Collection<? extends GrantedAuthority> extractAuthorities(ClaimAccessor accessor);
+public interface AuthoritiesExtractor {
+	Collection<? extends GrantedAuthority> extractAuthorities(Authentication authentication);
 }

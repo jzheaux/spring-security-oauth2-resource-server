@@ -18,9 +18,9 @@ dependencies {
 	compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compile 'org.springframework.boot:spring-boot-starter-web'
 
-	compile "org.springframework.security:spring-security-oauth2-client:$version"
-	compile "org.springframework.security:spring-security-oauth2-core:$version"
-	compile "org.springframework.security:spring-security-oauth2-jose:$version"
+	compile "org.springframework.security:spring-security-oauth2-client:5.1.0.M1"
+	compile "org.springframework.security:spring-security-oauth2-core:5.1.0.M1"
+	compile "org.springframework.security:spring-security-oauth2-jose:5.1.0.M1"
 
 	testCompile 'commons-io:commons-io'
 	testCompile 'org.springframework.boot:spring-boot-starter-test'

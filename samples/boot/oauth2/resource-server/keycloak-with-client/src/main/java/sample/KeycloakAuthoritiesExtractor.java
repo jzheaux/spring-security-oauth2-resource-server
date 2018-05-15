@@ -16,11 +16,12 @@
 
 package sample;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.oauth2.core.ClaimAccessor;
-import org.springframework.security.oauth2.core.ClaimAccessorAuthoritiesExtractor;
+import org.springframework.security.oauth2.core.AuthoritiesExtractor;
+import org.springframework.security.oauth2.resourceserver.authentication.AbstractOAuth2AccessTokenAuthenticationToken;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -33,23 +34,30 @@ import java.util.stream.Collectors;
 /**
  * @author Josh Cummings
  */
-public class KeycloakClaimAccessorAuthoritiesExtractor implements ClaimAccessorAuthoritiesExtractor {
+public class KeycloakAuthoritiesExtractor implements AuthoritiesExtractor {
 
 	private GrantedAuthoritiesMapper authoritiesMapper = authorities -> authorities;
 
 	@Override
-	public Collection<? extends GrantedAuthority> extractAuthorities(ClaimAccessor accessor) {
-		Collection<? extends GrantedAuthority> authorities =
-				Optional.ofNullable(
-								(Map<String, Object>) accessor.getClaims().get("realm_access"))
-						.map(realmAccess ->
-								(List<String>) realmAccess.get("roles"))
-						.orElse(Collections.emptyList())
-						.stream()
-						.map(SimpleGrantedAuthority::new)
-						.collect(Collectors.toList());
+	public Collection<? extends GrantedAuthority> extractAuthorities(Authentication authentication) {
+		if ( authentication instanceof AbstractOAuth2AccessTokenAuthenticationToken ) {
+			Map<String, Object> attributes =
+					((AbstractOAuth2AccessTokenAuthenticationToken) authentication).getTokenAttributes();
 
-		return this.authoritiesMapper.mapAuthorities(authorities);
+			Collection<? extends GrantedAuthority> authorities =
+					Optional.ofNullable(
+									(Map<String, Object>) attributes.get("realm_access"))
+							.map(realmAccess ->
+									(List<String>) realmAccess.get("roles"))
+							.orElse(Collections.emptyList())
+							.stream()
+							.map(SimpleGrantedAuthority::new)
+							.collect(Collectors.toList());
+
+			return this.authoritiesMapper.mapAuthorities(authorities);
+		}
+
+		return Collections.emptyList();
 	}
 
 	public void setAuthoritiesMapper(GrantedAuthoritiesMapper authoritiesMapper) {
