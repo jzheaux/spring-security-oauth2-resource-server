@@ -28,6 +28,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer.UrlConfigurer.url;
@@ -50,7 +51,8 @@ public class KeycloakApplication {
 
 	@Bean
 	KeycloakOAuth2UserService keycloakOidcUserService(OAuth2ClientProperties oauth2ClientProperties) {
-		return new KeycloakOAuth2UserService(authoritiesMapper());
+		String jwkSetUri = oauth2ClientProperties.getProvider().get("keycloak").getJwkSetUri();
+		return new KeycloakOAuth2UserService(authoritiesMapper(), new NimbusJwtDecoderJwkSupport(jwkSetUri));
 	}
 
 	@Bean
@@ -60,8 +62,7 @@ public class KeycloakApplication {
 
 	@Bean
 	KeycloakAuthoritiesExtractor keycloakOAuth2TokenAuthoritiesExtractor() {
-		KeycloakAuthoritiesExtractor extractor =
-				new KeycloakAuthoritiesExtractor();
+		KeycloakAuthoritiesExtractor extractor = new KeycloakAuthoritiesExtractor();
 
 		extractor.setAuthoritiesMapper(authoritiesMapper());
 
@@ -72,7 +73,6 @@ public class KeycloakApplication {
 	@Configuration
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
 		@Value("${kc.realm}") String realm;
 		@Value("${spring.security.oauth2.resourceserver.provider.keycloak.jwk-set-uri}") String jwkSetUri;
 
@@ -83,28 +83,28 @@ public class KeycloakApplication {
 		protected void configure(HttpSecurity http) throws Exception {
 			resourceServer(http)
 					.jwt()
-					.signature().keys(url(jwkSetUri))
-					.authoritiesExtractor(keycloakOAuth2TokenAuthoritiesExtractor());
+							.signature().keys(url(jwkSetUri))
+							.authoritiesExtractor(keycloakOAuth2TokenAuthoritiesExtractor());
 
 			http
-					.sessionManagement()
-							.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-							.and()
-					.authorizeRequests()
-							.anyRequest().permitAll()
-							.and()
-					.logout()
-							.addLogoutHandler(keycloakLogoutHandler())
-							.and()
-					.oauth2Login()
-							.userInfoEndpoint()
-									.oidcUserService(keycloakOidcUserService(oAuth2ClientProperties))
-							.and()
-					.loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + realm);
+				.sessionManagement()
+						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+						.and()
+				.authorizeRequests()
+						.anyRequest().permitAll()
+						.and()
+				.logout()
+						.addLogoutHandler(keycloakLogoutHandler())
+						.and()
+				.oauth2Login()
+						.userInfoEndpoint()
+								.oidcUserService(keycloakOidcUserService(oAuth2ClientProperties))
+						.and()
+				.loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + realm);
 		}
 
-		private ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer());
+		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer<>());
 		}
 
 	}

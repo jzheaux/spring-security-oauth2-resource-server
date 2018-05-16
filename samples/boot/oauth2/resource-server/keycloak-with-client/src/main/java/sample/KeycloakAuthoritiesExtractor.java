@@ -32,6 +32,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * An extract for getting authorities from a Keycloak-issued Bearer token
+ *
  * @author Josh Cummings
  */
 public class KeycloakAuthoritiesExtractor implements AuthoritiesExtractor {

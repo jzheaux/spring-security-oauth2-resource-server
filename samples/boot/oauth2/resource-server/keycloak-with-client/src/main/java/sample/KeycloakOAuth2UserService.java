@@ -26,6 +26,8 @@ import org.springframework.security.oauth2.core.ClaimAccessor;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -42,11 +45,13 @@ import java.util.stream.Collectors;
 public class KeycloakOAuth2UserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
 	private final GrantedAuthoritiesMapper authoritiesMapper;
+	private final JwtDecoder decoder;
 
 	private final OidcUserService delegate = new OidcUserService();
 
-	public KeycloakOAuth2UserService(GrantedAuthoritiesMapper authoritiesMapper) {
+	public KeycloakOAuth2UserService(GrantedAuthoritiesMapper authoritiesMapper, JwtDecoder decoder) {
 		this.authoritiesMapper = authoritiesMapper;
+		this.decoder = decoder;
 	}
 
 	/**
@@ -60,14 +65,13 @@ public class KeycloakOAuth2UserService implements OAuth2UserService<OidcUserRequ
 	@Override
 	public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
 
-		OidcUser user = delegate.loadUser(userRequest);
+		Jwt accessToken =
+				this.decoder.decode(userRequest.getAccessToken().getTokenValue());
 
 		String clientId = userRequest.getClientRegistration().getClientId();
 
-		ClaimAccessor claims = () -> user.getClaims();
-
 		Collection<? extends GrantedAuthority> authorities =
-				extract(claims, clientId).stream()
+				extract(accessToken, clientId).stream()
 						.map(SimpleGrantedAuthority::new)
 						.collect(Collectors.toList());
 
@@ -75,7 +79,11 @@ public class KeycloakOAuth2UserService implements OAuth2UserService<OidcUserRequ
 			authorities = authoritiesMapper.mapAuthorities(authorities);
 		}
 
-		return new DefaultOidcUser(new LinkedHashSet<>(authorities), userRequest.getIdToken(), user.getUserInfo(), "preferred_username");
+		OidcUser user = delegate.loadUser(userRequest);
+		Set<GrantedAuthority> authoritiesSet = new LinkedHashSet<>(user.getAuthorities());
+		authoritiesSet.addAll(authorities);
+
+		return new DefaultOidcUser(authoritiesSet, userRequest.getIdToken(), user.getUserInfo(), "preferred_username");
 	}
 
 	/**

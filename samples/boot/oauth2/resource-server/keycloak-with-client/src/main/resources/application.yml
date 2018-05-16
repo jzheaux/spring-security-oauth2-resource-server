@@ -28,10 +28,10 @@ spring:
     oauth2:
       client:
         registration:
-          demo:
+          master:
             client-id: app-demo
             client-name: Demo App
-            client-secret: e3f519b4-0272-4261-9912-8b7453ac4ecd
+            client-secret: 5bb6e850-0324-4153-8f68-ec630f6b9477
             provider: keycloak
             authorization-grant-type: authorization_code
             scope: openid, profile
