@@ -18,9 +18,9 @@ package sample;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,7 +42,7 @@ public class LocalKeySetRepositoryConfiguration {
 	}
 
 	@Bean
-	public Map<String, PublicKey> verify() throws Exception {
+	public Map<String, Key> verify() throws Exception {
 		return sign().entrySet().stream().collect(
 				Collectors.toMap(
 						Map.Entry::getKey,

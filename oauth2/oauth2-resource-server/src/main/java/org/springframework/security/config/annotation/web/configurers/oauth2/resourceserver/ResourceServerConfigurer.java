@@ -82,7 +82,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	public ResourceServerConfigurer() {
 	}
 
-	public ResourceServerConfigurer bearerTokenResolver(BearerTokenResolver resolver) {
+	public ResourceServerConfigurer<H> bearerTokenResolver(BearerTokenResolver resolver) {
 		this.resolver = resolver;
 		return this;
 	}
@@ -126,7 +126,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			return this;
 		}
 
-		public ResourceServerConfigurer and() {
+		public ResourceServerConfigurer<H> and() {
 			return ResourceServerConfigurer.this;
 		}
 	}

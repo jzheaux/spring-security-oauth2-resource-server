@@ -45,8 +45,8 @@ public class CustomExpressionsApplication {
 					.jwt().signature().key("foo", this.verify);
 		}
 
-		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer());
+		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer<>());
 		}
 	}
 

@@ -46,8 +46,8 @@ public class RemoteKeySetApplication {
 											.connectTimeout(30000L));
 		}
 
-		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer());
+		protected ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer<>());
 		}
 	}
 

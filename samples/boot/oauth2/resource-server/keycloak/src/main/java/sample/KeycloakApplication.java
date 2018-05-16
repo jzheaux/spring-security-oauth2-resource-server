@@ -54,8 +54,8 @@ public class KeycloakApplication {
 								.keys(url(this.certsEndpoint));
 		}
 
-		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer());
+		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer<>());
 		}
 	}
 

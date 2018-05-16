@@ -45,8 +45,8 @@ public class Auth0Application {
 					.jwt(jwtDecoder());
 		}
 
-		protected ResourceServerConfigurer resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer());
+		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
+			return http.apply(new ResourceServerConfigurer<>());
 		}
 
 		@Bean

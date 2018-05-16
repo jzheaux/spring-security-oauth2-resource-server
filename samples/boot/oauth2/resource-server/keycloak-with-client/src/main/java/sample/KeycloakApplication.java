@@ -69,7 +69,6 @@ public class KeycloakApplication {
 		return extractor;
 	}
 
-
 	@Configuration
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -84,23 +83,23 @@ public class KeycloakApplication {
 			resourceServer(http)
 					.jwt()
 							.signature().keys(url(jwkSetUri))
-							.authoritiesExtractor(keycloakOAuth2TokenAuthoritiesExtractor());
-
-			http
-				.sessionManagement()
-						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-						.and()
-				.authorizeRequests()
-						.anyRequest().permitAll()
-						.and()
-				.logout()
-						.addLogoutHandler(keycloakLogoutHandler())
-						.and()
-				.oauth2Login()
-						.userInfoEndpoint()
-								.oidcUserService(keycloakOidcUserService(oAuth2ClientProperties))
-						.and()
-				.loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + realm);
+							.authoritiesExtractor(keycloakOAuth2TokenAuthoritiesExtractor())
+							.and()
+					.and()
+			.sessionManagement()
+					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+					.and()
+			.authorizeRequests()
+					.anyRequest().permitAll()
+					.and()
+			.logout()
+					.addLogoutHandler(keycloakLogoutHandler())
+					.and()
+			.oauth2Login()
+					.userInfoEndpoint()
+							.oidcUserService(keycloakOidcUserService(oAuth2ClientProperties))
+					.and()
+			.loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + realm);
 		}
 
 		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
