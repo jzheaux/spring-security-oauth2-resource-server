@@ -26,6 +26,14 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * A class for generating keys as a convenience for the sample.
+ *
+ * Normally, one would have keys either on the local filesystem or remotely served. In both cases, this
+ * class is unnecessary.
+ *
+ * @author Josh Cummings
+ */
 @Component
 public class SimpleKeyRepositoryConfiguration implements BeanFactoryAware {
 
