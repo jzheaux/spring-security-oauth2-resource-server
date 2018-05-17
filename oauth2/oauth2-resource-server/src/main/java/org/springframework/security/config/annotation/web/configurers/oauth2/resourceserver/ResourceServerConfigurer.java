@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.resourceserver.authentication.JwtAcce
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
+import org.springframework.security.oauth2.resourceserver.web.BearerTokenRequestMatcher;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenResolver;
 import org.springframework.security.oauth2.resourceserver.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.resourceserver.web.access.BearerTokenAccessDeniedHandler;
@@ -47,6 +48,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -268,8 +272,8 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 				.defaultAuthenticationEntryPointFor(
 						bearerTokenAuthenticationEntryPoint(),
 						(request) -> Optional.ofNullable(request.getHeader("Authorization"))
-										.map(authorization -> authorization.startsWith("Bearer "))
-										.orElse(false));
+								.map(authorization -> authorization.startsWith("Bearer "))
+								.orElse(false));
 
 		/*
 		    TODO: There isn't a shared object for AccessDeniedHandler nor is there the same
@@ -289,10 +293,13 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 		   automatically in getHttp()
 		*/
 
-		csrf(http).requireCsrfProtectionMatcher(request ->
-			CsrfFilter.DEFAULT_CSRF_MATCHER.matches(request) &&
-					!Optional.ofNullable(request.getHeader("Authorization"))
-							.filter(header -> header.startsWith("Bearer ")).isPresent());
+
+		RequestMatcher requiresCsrf = new AndRequestMatcher(
+				CsrfFilter.DEFAULT_CSRF_MATCHER, // somehow get what the user specified
+				new NegatedRequestMatcher(new BearerTokenRequestMatcher())
+		);
+
+		csrf(http).requireCsrfProtectionMatcher(requiresCsrf);
 	}
 
 	@Override
