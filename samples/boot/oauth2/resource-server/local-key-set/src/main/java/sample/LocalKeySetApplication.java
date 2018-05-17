@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
+import org.springframework.security.oauth2.jwt.ByKidKeyProvider;
 
 import java.security.Key;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class LocalKeySetApplication {
 		protected void configure(HttpSecurity http) throws Exception {
 
 			resourceServer(http)
-					.jwt().signature().keys(this.verify);
+					.jwt().signature().keys(new ByKidKeyProvider(this.verify));
 		}
 
 		protected ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {

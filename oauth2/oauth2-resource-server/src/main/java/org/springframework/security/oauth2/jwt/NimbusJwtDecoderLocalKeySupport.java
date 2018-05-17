@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -37,29 +37,16 @@ import java.util.Map;
 public class NimbusJwtDecoderLocalKeySupport implements JwtDecoder {
 	private final NimbusJwtDecoder decoder;
 
-	public NimbusJwtDecoderLocalKeySupport(String keyId, Key key) {
-		this(keyId, key, JwsAlgorithms.RS256);
+	public NimbusJwtDecoderLocalKeySupport(KeyProvider provider) {
+		this(provider, JwsAlgorithms.RS256);
 	}
 
-	public NimbusJwtDecoderLocalKeySupport(String keyId, Key key, String jwsAlgorithm) {
-		Assert.notNull(key, "key cannot be null");
+	public NimbusJwtDecoderLocalKeySupport(KeyProvider provider, String jwsAlgorithm) {
+		Assert.notNull(provider, "provider cannot be null");
 		Assert.hasText(jwsAlgorithm, "jwsAlgorithm cannot be empty");
 
-		Map<String, Key> keys = new HashMap<>();
-		keys.put(keyId, key);
-
-		this.decoder = delegate(selector(keys, jwsAlgorithm));
-	}
-
-	public NimbusJwtDecoderLocalKeySupport(Map<String, Key> keys) {
-		this(keys, JwsAlgorithms.RS256);
-	}
-
-	public NimbusJwtDecoderLocalKeySupport(Map<String, Key> keys, String jwsAlgorithm) {
-		Assert.notEmpty(keys, "keys cannot be empty");
-		Assert.hasText(jwsAlgorithm, "jwsAlgorithm cannot be empty");
-
-		this.decoder = delegate(selector(keys, jwsAlgorithm));
+		this.decoder = delegate((jwsHeader, context) ->
+				provider.provide(new LinkedHashMap<String, Object>(jwsHeader.toJSONObject())));
 	}
 
 	@Override

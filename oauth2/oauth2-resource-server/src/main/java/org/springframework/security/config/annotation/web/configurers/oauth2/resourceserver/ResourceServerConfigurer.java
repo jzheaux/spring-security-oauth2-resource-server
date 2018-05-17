@@ -32,8 +32,10 @@ import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.KeyProvider;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoderLocalKeySupport;
+import org.springframework.security.oauth2.jwt.SingleKeyProvider;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
@@ -164,16 +166,16 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			return this.parent;
 		}
 
-		public JwtAccessTokenFormatConfigurer keys(Map<String, Key> keys) {
+		public JwtAccessTokenFormatConfigurer keys(KeyProvider provider) {
 			this.parent.jwtDecoder.decoder(
-					new NimbusJwtDecoderLocalKeySupport(keys, this.parent.algorithm));
+					new NimbusJwtDecoderLocalKeySupport(provider, this.parent.algorithm));
 
 			return this.parent;
 		}
 
-		public JwtAccessTokenFormatConfigurer key(String keyId, Key key) {
+		public JwtAccessTokenFormatConfigurer key(Key key) {
 			this.parent.jwtDecoder.decoder(
-					new NimbusJwtDecoderLocalKeySupport(keyId, key, this.parent.algorithm));
+					new NimbusJwtDecoderLocalKeySupport(new SingleKeyProvider(key), this.parent.algorithm));
 
 			return this.parent;
 		}

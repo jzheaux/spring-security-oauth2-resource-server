@@ -42,7 +42,7 @@ public class CustomExpressionsApplication {
 		protected void configure(HttpSecurity http) throws Exception {
 
 			resourceServer(http)
-					.jwt().signature().key("foo", this.verify);
+					.jwt().signature().key(this.verify);
 		}
 
 		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
