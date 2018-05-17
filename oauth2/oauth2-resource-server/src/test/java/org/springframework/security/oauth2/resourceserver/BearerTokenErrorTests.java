@@ -99,4 +99,39 @@ public class BearerTokenErrorTests {
 				.isInstanceOf(IllegalArgumentException.class).hasMessage("httpStatus must not be null");
 	}
 
+	@Test
+	public void constructorWithAllParametersWhenErrorCodeIsInvalidThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() -> new BearerTokenError(TEST_ERROR_CODE + "\"", TEST_HTTP_STATUS, TEST_DESCRIPTION,
+				TEST_URI, TEST_SCOPE))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("errorCode")
+				.hasMessageContaining("RFC 6750");
+	}
+
+	@Test
+	public void constructorWithAllParametersWhenDescriptionIsInvalidThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() -> new BearerTokenError(TEST_ERROR_CODE, TEST_HTTP_STATUS, TEST_DESCRIPTION + "\"",
+				TEST_URI, TEST_SCOPE))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("description")
+				.hasMessageContaining("RFC 6750");
+	}
+
+	@Test
+	public void constructorWithAllParametersWhenErrorUriIsInvalidThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() -> new BearerTokenError(TEST_ERROR_CODE, TEST_HTTP_STATUS, TEST_DESCRIPTION,
+				TEST_URI + "\"", TEST_SCOPE))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("errorUri")
+				.hasMessageContaining("RFC 6750");
+	}
+
+	@Test
+	public void constructorWithAllParametersWhenScopeIsInvalidThenThrowIllegalArgumentException() {
+		assertThatThrownBy(() -> new BearerTokenError(TEST_ERROR_CODE, TEST_HTTP_STATUS, TEST_DESCRIPTION,
+				TEST_URI, TEST_SCOPE + "\""))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("scope")
+				.hasMessageContaining("RFC 6750");
+	}
 }
