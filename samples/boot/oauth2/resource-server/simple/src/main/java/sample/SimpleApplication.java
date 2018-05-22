@@ -23,7 +23,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.KeyProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,6 +45,14 @@ public class SimpleApplication {
 		public String ok() {
 			return "ok";
 		}
+
+		@GetMapping("/authenticated")
+		public String okay(@AuthenticationPrincipal Authentication auth) {
+			if ( auth instanceof JwtAccessTokenAuthenticationToken ) {
+				return ((JwtAccessTokenAuthenticationToken) auth).getJwt().getSubject();
+			}
+			return null;
+		}
 	}
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -52,7 +63,11 @@ public class SimpleApplication {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 			resourceServer(http)
-					.jwt().signature().keys(this.verify);
+					.jwt()
+							.signature().keys(this.verify).and()
+					.and()
+			.authorizeRequests()
+					.anyRequest().authenticated();
 		}
 
 		protected ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
