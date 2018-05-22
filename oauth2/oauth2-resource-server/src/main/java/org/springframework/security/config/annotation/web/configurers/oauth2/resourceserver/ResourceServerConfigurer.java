@@ -28,7 +28,7 @@ import org.springframework.security.config.annotation.web.configurers.ExceptionH
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.AuthoritiesExtractor;
-import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -39,7 +39,7 @@ import org.springframework.security.oauth2.jwt.SingleKeyProvider;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenVerifier;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenValidator;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenRequestMatcher;
@@ -76,7 +76,7 @@ import java.util.Optional;
  *
  * oauth2().resourceServer()
  *         .jwt(auth0AccessTokenProcessor())
- *         .verifiers(customVerifier())
+ *         .validators(some(), custom(), validators())
  *
  * @author Josh Cummings
  */
@@ -114,7 +114,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 
 	public class JwtAccessTokenFormatConfigurer {
 		protected JwtDecoderConfigurer jwtDecoder = new JwtDecoderConfigurer();
-		private Collection<OAuth2TokenVerifier<Jwt>> verifiers = new ArrayList<>();
+		private Collection<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
 		private AuthoritiesExtractor extractor = (authentication) -> Collections.emptyList();
 		private String scopeAttributeName;
 
@@ -134,8 +134,8 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			return this;
 		}
 
-		public JwtAccessTokenFormatConfigurer verifiers(OAuth2TokenVerifier<Jwt>... verifiers) {
-			this.verifiers = Arrays.asList(verifiers);
+		public JwtAccessTokenFormatConfigurer validators(OAuth2TokenValidator<Jwt>... validators) {
+			this.validators = Arrays.asList(validators);
 			return this;
 		}
 
@@ -391,15 +391,15 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 					new NimbusJwtDecoderLocalKeySupport(resolvers.values().iterator().next()));
 		}
 
-		JwtAccessTokenVerifier verifier =
-				this.jwtAccessTokenFormatConfigurer.verifiers.isEmpty() ?
-						new JwtAccessTokenVerifier() :
-						new JwtAccessTokenVerifier(this.jwtAccessTokenFormatConfigurer.verifiers.iterator().next());
+		JwtAccessTokenValidator validator =
+				this.jwtAccessTokenFormatConfigurer.validators.isEmpty() ?
+						new JwtAccessTokenValidator() :
+						new JwtAccessTokenValidator(this.jwtAccessTokenFormatConfigurer.validators.iterator().next());
 
 		JwtAccessTokenAuthenticationProvider provider =
 			new JwtAccessTokenAuthenticationProvider(
 					this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder(),
-					verifier);
+					validator);
 
 		provider.setAuthoritiesExtractor(this.jwtAccessTokenFormatConfigurer.extractor);
 

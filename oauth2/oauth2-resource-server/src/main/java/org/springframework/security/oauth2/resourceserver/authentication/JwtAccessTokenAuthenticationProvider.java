@@ -43,29 +43,29 @@ import java.util.Collections;
  * @author Josh Cummings
  * @author Joe Grandja
  * @since 5.1
- * @see JwtAccessTokenVerifier
+ * @see JwtAccessTokenValidator
  * @see AuthenticationProvider
  * @see JwtDecoder
  */
 public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
 	private final JwtDecoder jwtDecoder;
-	private final JwtAccessTokenVerifier jwtVerifier;
+	private final JwtAccessTokenValidator jwtValidator;
 
 	private AuthoritiesExtractor authoritiesExtractor = (authentication) -> Collections.emptyList();
 
 	private String scopeAttributeName;
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
-		this(jwtDecoder, new JwtAccessTokenVerifier());
+		this(jwtDecoder, new JwtAccessTokenValidator());
 	}
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
-												JwtAccessTokenVerifier jwtVerifier) {
+												JwtAccessTokenValidator jwtValidator) {
 		Assert.notNull(jwtDecoder, "jwtDecoder is required");
-		Assert.notNull(jwtVerifier, "jwtVerifier is required");
+		Assert.notNull(jwtValidator, "jwtValidator is required");
 
 		this.jwtDecoder = jwtDecoder;
-		this.jwtVerifier = jwtVerifier;
+		this.jwtValidator = jwtValidator;
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 			throw new OAuth2AuthenticationException(invalidRequest, failed);
 		}
 
-		this.jwtVerifier.verify(jwt);
+		this.jwtValidator.validate(jwt);
 
 		Collection<? extends GrantedAuthority> authorities =
 				this.authoritiesExtractor.extractAuthorities(new JwtAccessTokenAuthenticationToken(jwt));

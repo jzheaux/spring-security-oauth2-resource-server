@@ -47,7 +47,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 	JwtDecoder jwtDecoder;
 
 	@Mock
-	JwtAccessTokenVerifier jwtVerifier;
+	JwtAccessTokenValidator jwtValidator;
 
 	@Mock
 	Jwt jwt;
@@ -82,11 +82,11 @@ public class JwtAccessTokenAuthenticationProviderTests {
 	}
 
 	@Test
-	public void authenticateWhenJwtVerifierFailsThenResponseWithInvalidRequest() {
+	public void authenticateWhenJwtValidatorFailsThenResponseWithInvalidRequest() {
 		PreAuthenticatedAuthenticationToken token = this.authentication();
 
 		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
-		doThrow(OAuth2AuthenticationException.class).when(this.jwtVerifier).verify(this.jwt);
+		doThrow(OAuth2AuthenticationException.class).when(this.jwtValidator).validate(this.jwt);
 
 		assertThatThrownBy(() -> this.provider.authenticate(token))
 				.isInstanceOf(OAuth2AuthenticationException.class);

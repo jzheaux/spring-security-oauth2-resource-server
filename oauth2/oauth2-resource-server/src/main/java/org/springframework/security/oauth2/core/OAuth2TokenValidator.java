@@ -23,7 +23,7 @@ package org.springframework.security.oauth2.core;
  * @author Josh Cummings
  * @since 5.1
  */
-public interface OAuth2TokenVerifier<T extends AbstractOAuth2Token> {
+public interface OAuth2TokenValidator<T extends AbstractOAuth2Token> {
 
 	/**
 	 * Verify the validity and/or constraints of the provided OAuth 2.0 Token.
@@ -31,6 +31,6 @@ public interface OAuth2TokenVerifier<T extends AbstractOAuth2Token> {
 	 * @param token an OAuth 2.0 token
 	 * @throws OAuth2AuthenticationException if an error occurs while attempting to verify the token attributes
 	 */
-	void verify(T token) throws OAuth2AuthenticationException;
+	void validate(T token) throws OAuth2AuthenticationException;
 
 }

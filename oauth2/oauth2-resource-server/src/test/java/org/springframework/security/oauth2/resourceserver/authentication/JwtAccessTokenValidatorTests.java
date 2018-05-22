@@ -28,9 +28,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author Josh Cummings
  */
-public class JwtAccessTokenVerifierTests {
+public class JwtAccessTokenValidatorTests {
 	@Test
-	public void verifyWhenJwtIsExpiredThenErrorMessageIndicatesExpirationTime() {
+	public void validateWhenJwtIsExpiredThenErrorMessageIndicatesExpirationTime() {
 		Instant expiry = Instant.MIN.plusSeconds(1);
 
 		Jwt jwt = new Jwt(
@@ -40,14 +40,14 @@ public class JwtAccessTokenVerifierTests {
 				Maps.newHashMap("alg", JwsAlgorithms.RS256),
 				Maps.newHashMap(JwtClaimNames.EXP, expiry));
 
-		JwtAccessTokenVerifier verifier = new JwtAccessTokenVerifier();
+		JwtAccessTokenValidator validator = new JwtAccessTokenValidator();
 
-		assertThatThrownBy(() -> verifier.verify(jwt))
+		assertThatThrownBy(() -> validator.validate(jwt))
 				.hasMessageContaining("Jwt expired at " + expiry);
 	}
 
 	@Test
-	public void verifyWhenJwtIsTooEarlyThenErrorMessageIndicatesNotBeforeTime() {
+	public void validateWhenJwtIsTooEarlyThenErrorMessageIndicatesNotBeforeTime() {
 		Instant oneHourFromNow = Instant.now().plusSeconds(3600);
 
 		Jwt jwt = new Jwt(
@@ -57,9 +57,9 @@ public class JwtAccessTokenVerifierTests {
 				Maps.newHashMap("alg", JwsAlgorithms.RS256),
 				Maps.newHashMap(JwtClaimNames.NBF, oneHourFromNow));
 
-		JwtAccessTokenVerifier verifier = new JwtAccessTokenVerifier();
+		JwtAccessTokenValidator validator = new JwtAccessTokenValidator();
 
-		assertThatThrownBy(() -> verifier.verify(jwt))
+		assertThatThrownBy(() -> validator.validate(jwt))
 				.hasMessageContaining("Jwt used before " + oneHourFromNow);
 	}
 }

@@ -19,7 +19,7 @@ package org.springframework.security.oauth2.resourceserver.authentication;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.core.OAuth2TokenVerifier;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
 
@@ -28,7 +28,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 /**
- * An implementation of {@see JwtVerifier} for verifying claims in a Jwt-based access token
+ * An implementation of {@see OAuth2TokenValidator} for verifying claims in a Jwt-based access token
  *
  * <p>
  * Because clocks can differ between the Jwt source, say the Authorization Server, and its destination, say the
@@ -37,42 +37,42 @@ import java.time.temporal.ChronoUnit;
  *
  * <p>
  * Custom verification can be appended to instances of this class by providing a custom implementation of
- * {@see JwtVerifier}
+ * {@link OAuth2TokenValidator}
  *
  * @author Josh Cummings
  * @since 5.1
  * @see Jwt
- * @see OAuth2TokenVerifier
+ * @see OAuth2TokenValidator
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  */
-public class JwtAccessTokenVerifier implements OAuth2TokenVerifier<Jwt> {
+public class JwtAccessTokenValidator implements OAuth2TokenValidator<Jwt> {
 	private static final Duration DEFAULT_MAX_CLOCK_SKEW = Duration.of(60, ChronoUnit.SECONDS);
 
-	private final OAuth2TokenVerifier<Jwt> additionalVerification;
+	private final OAuth2TokenValidator<Jwt> additionalValidation;
 
 	private final Duration maxClockSkew;
 
 	/**
 	 * A basic instance with no custom verification and the default max clock skew
 	 */
-	public JwtAccessTokenVerifier() {
+	public JwtAccessTokenValidator() {
 		this((jwt) -> {});
 	}
 
-	public JwtAccessTokenVerifier(OAuth2TokenVerifier<Jwt> jwtVerifier) {
-		this(jwtVerifier, DEFAULT_MAX_CLOCK_SKEW);
+	public JwtAccessTokenValidator(OAuth2TokenValidator<Jwt> jwtValidator) {
+		this(jwtValidator, DEFAULT_MAX_CLOCK_SKEW);
 	}
 
-	public JwtAccessTokenVerifier(OAuth2TokenVerifier<Jwt> jwtVerifier, Duration maxClockSkew) {
-		Assert.notNull(jwtVerifier, "jwtVerifier cannot be null");
+	public JwtAccessTokenValidator(OAuth2TokenValidator<Jwt> jwtValidator, Duration maxClockSkew) {
+		Assert.notNull(jwtValidator, "jwtValidator cannot be null");
 		Assert.notNull(maxClockSkew, "maxClockSkew cannot be null");
 
-		this.additionalVerification = jwtVerifier;
+		this.additionalValidation = jwtValidator;
 		this.maxClockSkew = maxClockSkew;
 	}
 
 	@Override
-	public void verify(Jwt jwt) throws OAuth2AuthenticationException {
+	public void validate(Jwt jwt) throws OAuth2AuthenticationException {
 		Instant expiry = jwt.getExpiresAt();
 
 		if ( expiry != null ) {
@@ -97,6 +97,6 @@ public class JwtAccessTokenVerifier implements OAuth2TokenVerifier<Jwt> {
 			}
 		}
 
-		additionalVerification.verify(jwt);
+		additionalValidation.validate(jwt);
 	}
 }
