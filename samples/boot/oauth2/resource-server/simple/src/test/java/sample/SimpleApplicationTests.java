@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.security.PrivateKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -86,7 +87,7 @@ public class SimpleApplicationTests {
 	public void performWhenMissingAuthorizationHeaderThenUnauthorized()
 		throws Exception {
 
-		this.mockMvc.perform(get("/ok"))
+		this.mockMvc.perform(get("/ok").with(csrf()))
 				.andExpect(status().isUnauthorized());
 	}
 
