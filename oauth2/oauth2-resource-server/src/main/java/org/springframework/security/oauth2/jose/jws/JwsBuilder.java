@@ -107,12 +107,12 @@ public class JwsBuilder {
 	 * Also note that this method should only be used when the test genuinely does not
 	 * care which JWK is chosen.
 	 *
-	 * @param builder - the JWK set to use
+	 * @param provider - the key provider to use
 	 *
 	 * @return
 	 */
-	public JwsBuilder signWithAny(JwkSetBuilder builder) {
-		Map<String, Key> keys = builder.getKeyMap();
+	public JwsBuilder signWithAny(JwkSetBuilder provider) {
+		Map<String, Key> keys = provider.getKeyMap();
 
 		if ( keys.isEmpty() ) {
 			throw new IllegalStateException("no keys configured in provided JwkSetBuilder");
@@ -121,6 +121,8 @@ public class JwsBuilder {
 			return sign(entry.getKey(), entry.getValue());
 		}
 	}
+
+
 
 	/**
 	 * Sign the JWT with the given kid and JWK set
@@ -140,11 +142,21 @@ public class JwsBuilder {
 	 * @return
 	 */
 	public JwsBuilder sign(String keyId, Key key) {
+		this.header.keyID(keyId);
+		return this.sign(key);
+	}
+
+	/**
+	 * Sign the JWT with the given key
+	 *
+	 * @return
+	 */
+	public JwsBuilder sign(Key key) {
 		this.claim("scope", this.scope.stream().collect(Collectors.joining(" ")));
 
 		this.jws =
 				new JWSObject(
-						this.header.keyID(keyId).build(),
+						this.header.build(),
 						new Payload(this.payload)
 				);
 
@@ -161,8 +173,8 @@ public class JwsBuilder {
 		}
 
 		return this;
-	}
 
+	}
 
 	/**
 	 * Build the JWT

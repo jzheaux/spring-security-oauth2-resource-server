@@ -15,13 +15,19 @@
  */
 package sample;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
+import org.springframework.security.oauth2.jwt.KeyProvider;
+import org.springframework.security.oauth2.jwt.SingleKeyProvider;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.PublicKey;
 
@@ -30,17 +36,27 @@ import java.security.PublicKey;
  */
 @SpringBootApplication
 public class SimpleApplication {
+	@RestController
+	public class SimpleController {
+
+		@GetMapping("/ok")
+		@PreAuthorize("@oauth2.hasScope(authentication, 'ok')")
+		public String ok() {
+			return "ok";
+		}
+	}
 
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Autowired
-		PublicKey verify;
-
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 
-			resourceServer(http)
-					.jwt().signature().key(this.verify);
+			resourceServer(http).jwt();
+		}
+
+		@Bean
+		public KeyProvider key(@Value("${jwt.verifying.key}") PublicKey key) {
+			return (SingleKeyProvider) () -> key;
 		}
 
 		protected ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {

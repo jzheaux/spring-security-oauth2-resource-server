@@ -174,8 +174,10 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 		}
 
 		public JwtAccessTokenFormatConfigurer key(Key key) {
+			SingleKeyProvider provider = () -> key;
+
 			this.parent.jwtDecoder.decoder(
-					new NimbusJwtDecoderLocalKeySupport(new SingleKeyProvider(key), this.parent.algorithm));
+					new NimbusJwtDecoderLocalKeySupport(provider, this.parent.algorithm));
 
 			return this.parent;
 		}
@@ -353,6 +355,18 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	}
 
 	private AuthenticationProvider oauthResourceAuthenticationProvider() {
+		ApplicationContext context = getBuilder().getSharedObject(ApplicationContext.class);
+
+		Map<String, KeyProvider> resolvers =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, KeyProvider.class);
+
+		if ( !resolvers.isEmpty() &&
+				this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder() == null ) {
+
+			this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder(
+					new NimbusJwtDecoderLocalKeySupport(resolvers.values().iterator().next()));
+		}
+
 		JwtAccessTokenVerifier verifier =
 				this.jwtAccessTokenFormatConfigurer.verifiers.isEmpty() ?
 						new JwtAccessTokenVerifier() :

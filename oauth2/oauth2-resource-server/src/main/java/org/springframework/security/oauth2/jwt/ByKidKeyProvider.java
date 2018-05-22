@@ -44,7 +44,7 @@ public class ByKidKeyProvider implements KeyProvider {
 	}
 
 	@Override
-	public List<? extends Key> provide(Map<String, Object> header) {
+	public List<Key> provide(Map<String, Object> header) {
 		return Optional.ofNullable(this.keys.get(header.get("kid")))
 				.map(Arrays::asList)
 				.orElse(Collections.emptyList());

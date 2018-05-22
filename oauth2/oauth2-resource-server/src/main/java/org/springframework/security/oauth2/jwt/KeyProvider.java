@@ -27,5 +27,5 @@ import java.util.Map;
  * @author Josh Cummings
  */
 public interface KeyProvider {
-	List<? extends Key> provide(Map<String, Object> header);
+	List<Key> provide(Map<String, Object> header);
 }
