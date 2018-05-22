@@ -1,0 +1,47 @@
+#
+# Copyright 2002-2018 the original author or authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+jwt.verifying.key: classpath:simple.pub
+jwt.signing.key: |
+  -----BEGIN PRIVATE KEY-----
+  MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCovjy/VyWAXD4S
+  +bXjmmaHydFiI23vYa6myyGftCzx3ETJ0JGnUM85X89qE+TXLae+V0E0iF80vXck
+  4CInoFOIX7YgK4gICEMCssydMfrWgvUd6mrxbXGlr2DGycvU/nW2G9+aKJPhFNbn
+  uSjLjEhaYinxldd9iB0fa4cn1HQJAG5gp7ucQ45uPEIVYLxLfSG459bZxi2/SIHb
+  eHrDnPZ8MuN11fq/8VczuS1yiSCmbf9ea9P/5svr8YbDP2TqQk7IxO5t5yv5ZP/+
+  V7yKRjrrOWmVhdFCHqugV8UIvbU+3zE3nOuT7QAxlSeaLwXZLbO1IGYBUnsfvUQt
+  exREFVmnAgMBAAECggEAeZIVUgUHD6NlVWZylLf4hnvwTjQYUA6gNarDXrwAZX+8
+  T2nkhhbCNSPB2zrZ8+0AnTFf2OknLmgSHo8cDFCF3gqWvDagmqjZHmiS4e3QOhu/
+  XP42bhnbdvMTViSspZduVvVd80Kox9Crw+aybXNz7Sor7dF2nwohcTGW/isiLhjk
+  oJKjHMX7c6oBFOoj0yXnW3/SO22CjcP5vgSvPahFw51ScKH1hATxwZr2PHflYu4T
+  6iipWHzasQ1UDQEbqWShmXW/TB2UOUUZvO4RtHKUcmyGFUpk/a9LN3M9FpJ67WCm
+  ZIYsCRml/UKwK+n6NtJwjQPffGBkpgtNmoC4velygQKBgQDkQK3+flLT0L4TiJfm
+  V5pevAJkM4ptI1CrQQxCg88i/ivTv7ZonqXr5b9DeIGjbHdZUqiOurXjWategDxx
+  djFr7LJdCDtePMyzb2y3eg0sku2pkmEn2xcyHnXNWL0rPv1GCctcRYk2TXTdvVpp
+  FSEWBtbL+ep9cLXTorHBum+twwKBgQC9QZhijYnipDrWgRlhHWLr7SfS98exBRLz
+  ToZYrl6uNkS1PfNLe6G0UBN2eMgQjnB+4H4yyUcvoZXaZAkQMpFj9FKhAImJFIJV
+  vieUMAl3+sYbyMH4j8dRZGVem1ueYvmq9Ks2kIynJ09+nUY40z+r/2AAkP4ma+J2
+  1+qd7loyTQKBgG7w+SEPaVbGyPxZketFfSS6oTbuzkOJvLXgYgMaad2KSOcc8Z4c
+  Lm1gN/ylX+181O23fXISUkH03ZSLI9XKKu9YFsGdNK3zQ1Obvu3XBvw5VgbrvQlQ
+  NhAIOh3bGechMJ2QOSXaLn0UXM9CL+WPfYtlO5XdHRpnZBk/pMKSyaFdAoGBAJ0e
+  /S0sxsGziOmWyoQ2ym6GOF7MuSu8w6vdkGnFcfN+OHKj2P3cyTYSmOXthmNAbiLX
+  q83sDr57jxZ9oIyi/tOV/peOA6Ebts0Kjn9XljTWrGxasrbyXw6yo/n0Tw7iqtaE
+  RDSLs0n+t9+tIKSCtUTNQl2WAnnRbXUu8qhlPtqtAoGBAM0LB7hUO/gO+3/dOO5h
+  dGVeXpXFV5kzCfyc8e5Ejb9LFagPgfhhiSpWgD/OWQVKosvF5Pzo2jPt2v2+u0RJ
+  z90MeLAy3icDaxqU3GodXE0OakCJL6jy+1E1OH+swansH1Nv96G3BnBYPicSOPvz
+  YmV5uhNUuF57lgBQ05TdS0aO
+  -----END PRIVATE KEY-----
+

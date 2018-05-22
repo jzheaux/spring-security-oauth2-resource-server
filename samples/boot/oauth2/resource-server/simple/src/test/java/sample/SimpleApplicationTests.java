@@ -18,6 +18,7 @@ package sample;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
@@ -46,8 +47,8 @@ public class SimpleApplicationTests {
 	@Autowired
 	MockMvc mockMvc;
 
-	@Autowired
-	PrivateKey priv;
+	@Value("${jwt.signing.key}")
+	PrivateKey sign;
 
 	@Test
 	public void performWhenProperAuthorizationHeaderThenAllow()
@@ -55,7 +56,7 @@ public class SimpleApplicationTests {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim("scp", "ok")
-				.sign("foo", this.priv)
+				.sign("foo", this.sign)
 				.build();
 
 		this.mockMvc.perform(get("/ok")
@@ -70,7 +71,7 @@ public class SimpleApplicationTests {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim("scp", "ok")
-				.sign("foo", this.priv)
+				.sign("foo", this.sign)
 				.build();
 
 		MvcResult result =
@@ -94,7 +95,7 @@ public class SimpleApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.sign("foo", this.priv)
+				.sign("foo", this.sign)
 				.build();
 
 		this.mockMvc.perform(get("/ok")
