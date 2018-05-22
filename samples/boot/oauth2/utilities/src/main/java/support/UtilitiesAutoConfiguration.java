@@ -28,7 +28,8 @@ public class UtilitiesAutoConfiguration {
 		DefaultConversionService service = new DefaultConversionService();
 		service.addConverter(new PublicKeyConverter());
 		service.addConverter(new PrivateKeyConverter());
-
+		service.addConverter(new KeyProviderPublicKeyConverter());
+		service.addConverter(new KeyProviderPrivateKeyConverter());
 		return service;
 	}
 }

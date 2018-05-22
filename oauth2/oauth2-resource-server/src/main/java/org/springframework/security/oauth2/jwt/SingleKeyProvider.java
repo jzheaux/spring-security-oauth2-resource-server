@@ -27,12 +27,12 @@ import java.util.Map;
  * @since 5.1
  * @author Josh Cummings
  */
-public interface SingleKeyProvider extends KeyProvider {
+public interface SingleKeyProvider<T extends Key> extends KeyProvider<T> {
 
 	@Override
-	default List<Key> provide(Map<String, Object> header) {
+	default List<T> provide(Map<String, Object> header) {
 		return Arrays.asList(this.key());
 	}
 
-	Key key();
+	T key();
 }
