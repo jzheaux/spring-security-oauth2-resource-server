@@ -107,4 +107,27 @@ public class SimpleApplicationTests {
 								"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
 								"scope=\"ok\""));
 	}
+
+	@Test
+	public void performWhenProperAuthorizationHeaderThenJwtCorrectlyParsed()
+		throws Exception {
+
+		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.claim("sub", "harold")
+				.sign("foo", this.sign)
+				.build();
+
+		this.mockMvc.perform(get("/authenticated")
+				.header("Authorization", "Bearer " + token))
+				.andExpect(content().string("harold"))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void performWhenMissingAuthorizationHeaderAndOnlyAuthenticationRequiredThenForbidden()
+			throws Exception {
+
+		this.mockMvc.perform(get("/authenticated"))
+				.andExpect(status().isUnauthorized());
+	}
 }
