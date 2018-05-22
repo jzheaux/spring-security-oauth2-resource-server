@@ -55,7 +55,7 @@ public class SimpleApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("scp", "ok")
+				.scope("ok")
 				.sign("foo", this.sign)
 				.build();
 
@@ -70,7 +70,7 @@ public class SimpleApplicationTests {
 			throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("scp", "ok")
+				.scope("ok")
 				.sign("foo", this.sign)
 				.build();
 

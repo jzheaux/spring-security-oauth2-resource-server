@@ -53,7 +53,7 @@ public class RemoteKeySetApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("scp", "ok")
+				.scope("ok")
 				.signWithAny(jwks)
 				.build();
 
@@ -68,7 +68,7 @@ public class RemoteKeySetApplicationTests {
 			throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("scp", "ok")
+				.scope("ok")
 				.signWithAny(jwks)
 				.build();
 

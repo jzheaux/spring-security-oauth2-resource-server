@@ -48,8 +48,6 @@ import java.util.Collections;
  * @see JwtDecoder
  */
 public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
-	private static final String SCP = "scp"; //TODO: Find a home for this; cannot be JwtClaimNames since not part of JWT spec
-
 	private final JwtDecoder jwtDecoder;
 	private final JwtAccessTokenVerifier jwtVerifier;
 
@@ -98,8 +96,6 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 		if ( StringUtils.hasText(this.scopeAttributeName) ) {
 			token.setScopeAttributeName(this.scopeAttributeName);
-		} else if ( jwt.getClaims().containsKey(SCP) ) {
-			token.setScopeAttributeName(SCP);
 		}
 
 		return token;
