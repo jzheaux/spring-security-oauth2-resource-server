@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.security.oauth2.jwt;
+package support;
 
-import java.security.Key;
-import java.util.List;
-import java.util.Map;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.oauth2.jwt.KeyProvider;
 
-/**
- * An interface for retrieving keys used to verify JWT signatures
- *
- * @since 5.1
- * @author Josh Cummings
- */
-public interface KeyProvider<T extends Key> {
-	List<T> provide(Map<String, Object> header);
+import java.security.PublicKey;
+import java.util.Arrays;
+
+public class KeyProviderPublicKeyConverter implements Converter<String, KeyProvider<PublicKey>> {
+	private final PublicKeyConverter delegate = new PublicKeyConverter();
+
+	@Override
+	public KeyProvider<PublicKey> convert(String source) {
+		return header -> Arrays.asList(this.delegate.convert(source));
+	}
 }

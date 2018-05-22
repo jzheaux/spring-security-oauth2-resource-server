@@ -31,20 +31,20 @@ import java.util.Optional;
  * @since 5.1
  * @author Josh Cummings
  */
-public class ByKidKeyProvider implements KeyProvider {
-	private final Map<String, Key> keys;
+public class ByKidKeyProvider<T extends Key> implements KeyProvider<T> {
+	private final Map<String, T> keys;
 
-	public ByKidKeyProvider(String kid, Key key) {
+	public ByKidKeyProvider(String kid, T key) {
 		this.keys = new HashMap<>();
 		this.keys.put(kid, key);
 	}
 
-	public ByKidKeyProvider(Map<String, Key> keys) {
+	public ByKidKeyProvider(Map<String, T> keys) {
 		this.keys = keys;
 	}
 
 	@Override
-	public List<Key> provide(Map<String, Object> header) {
+	public List<T> provide(Map<String, Object> header) {
 		return Optional.ofNullable(this.keys.get(header.get("kid")))
 				.map(Arrays::asList)
 				.orElse(Collections.emptyList());
