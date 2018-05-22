@@ -19,15 +19,16 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.AuthoritiesExtractor;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.core.AuthoritiesExtractor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,10 +48,14 @@ import java.util.Collections;
  * @see JwtDecoder
  */
 public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
+	private static final String SCP = "scp"; //TODO: Find a home for this; cannot be JwtClaimNames since not part of JWT spec
+
 	private final JwtDecoder jwtDecoder;
 	private final JwtAccessTokenVerifier jwtVerifier;
 
 	private AuthoritiesExtractor authoritiesExtractor = (authentication) -> Collections.emptyList();
+
+	private String scopeAttributeName;
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
 		this(jwtDecoder, new JwtAccessTokenVerifier());
@@ -91,8 +96,10 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		JwtAccessTokenAuthenticationToken token =
 				new JwtAccessTokenAuthenticationToken(jwt, authorities);
 
-		if ( jwt.getClaims().get("scp") != null ) {
-			token.setScopeAttributeName("scp");
+		if ( StringUtils.hasText(this.scopeAttributeName) ) {
+			token.setScopeAttributeName(this.scopeAttributeName);
+		} else if ( jwt.getClaims().containsKey(SCP) ) {
+			token.setScopeAttributeName(SCP);
 		}
 
 		return token;
@@ -106,5 +113,9 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 	public void setAuthoritiesExtractor(AuthoritiesExtractor authoritiesExtractor) {
 		Assert.notNull(authoritiesExtractor, "authoritiesExtractor cannot be null");
 		this.authoritiesExtractor = authoritiesExtractor;
+	}
+
+	public void setScopeAttributeName(String scopeAttributeName) {
+		this.scopeAttributeName = scopeAttributeName;
 	}
 }

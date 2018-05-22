@@ -40,9 +40,7 @@ public class Auth0Application {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-
-			resourceServer(http)
-					.jwt(jwtDecoder());
+			resourceServer(http);
 		}
 
 		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {

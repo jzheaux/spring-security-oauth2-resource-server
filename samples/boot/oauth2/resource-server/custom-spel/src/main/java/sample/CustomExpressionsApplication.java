@@ -42,7 +42,9 @@ public class CustomExpressionsApplication {
 		protected void configure(HttpSecurity http) throws Exception {
 
 			resourceServer(http)
-					.jwt().signature().key(this.verify);
+					.jwt()
+						.signature().key(this.verify)
+						.scopeAttributeName("custom-scope-attribute-name");
 		}
 
 		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {

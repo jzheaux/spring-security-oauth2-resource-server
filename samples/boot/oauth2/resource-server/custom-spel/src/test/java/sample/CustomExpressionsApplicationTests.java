@@ -64,7 +64,7 @@ public class CustomExpressionsApplicationTests {
 				.andExpect(status().isOk());
 
 		token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("scp", Arrays.asList("ok"))
+				.claim("custom-scope-attribute-name", Arrays.asList("ok"))
 				.sign("foo", sign)
 				.build();
 

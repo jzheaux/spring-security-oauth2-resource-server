@@ -53,6 +53,7 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.StringUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -115,6 +116,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 		protected JwtDecoderConfigurer jwtDecoder = new JwtDecoderConfigurer();
 		private Collection<OAuth2TokenVerifier<Jwt>> verifiers = new ArrayList<>();
 		private AuthoritiesExtractor extractor = (authentication) -> Collections.emptyList();
+		private String scopeAttributeName;
 
 		public JwtAccessTokenFormatConfigurer() {}
 
@@ -124,6 +126,11 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 
 		public JwtAccessTokenFormatConfigurer authoritiesExtractor(AuthoritiesExtractor extractor) {
 			this.extractor = extractor;
+			return this;
+		}
+
+		public JwtAccessTokenFormatConfigurer scopeAttributeName(String scopeAttributeName) {
+			this.scopeAttributeName = scopeAttributeName;
 			return this;
 		}
 
@@ -357,6 +364,23 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	private AuthenticationProvider oauthResourceAuthenticationProvider() {
 		ApplicationContext context = getBuilder().getSharedObject(ApplicationContext.class);
 
+		Map<String, JwtDecoder> decoders =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, JwtDecoder.class);
+
+		if ( !decoders.isEmpty() &&
+				this.jwtAccessTokenFormatConfigurer == null ) {
+			JwtDecoder decoder = decoders.values().iterator().next();
+
+			this.jwtAccessTokenFormatConfigurer = new JwtAccessTokenFormatConfigurer(decoder);
+		}
+
+		if ( !decoders.isEmpty() &&
+				this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder() == null ) {
+			JwtDecoder decoder = decoders.values().iterator().next();
+
+			this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder(decoder);
+		}
+
 		Map<String, KeyProvider> resolvers =
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, KeyProvider.class);
 
@@ -378,6 +402,10 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 					verifier);
 
 		provider.setAuthoritiesExtractor(this.jwtAccessTokenFormatConfigurer.extractor);
+
+		if ( StringUtils.hasText(this.jwtAccessTokenFormatConfigurer.scopeAttributeName) ) {
+			provider.setScopeAttributeName(this.jwtAccessTokenFormatConfigurer.scopeAttributeName);
+		}
 
 		return provider;
 	}
