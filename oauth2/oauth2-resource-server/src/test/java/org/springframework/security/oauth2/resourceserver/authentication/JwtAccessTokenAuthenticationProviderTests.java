@@ -15,18 +15,20 @@
  */
 package org.springframework.security.oauth2.resourceserver.authentication;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -47,13 +49,21 @@ public class JwtAccessTokenAuthenticationProviderTests {
 	JwtDecoder jwtDecoder;
 
 	@Mock
-	JwtAccessTokenValidator jwtValidator;
+	OAuth2TokenValidator<Jwt> validator;
 
 	@Mock
 	Jwt jwt;
 
-	@InjectMocks
 	JwtAccessTokenAuthenticationProvider provider;
+
+	@Before
+	public void setup() {
+		this.provider =
+				new JwtAccessTokenAuthenticationProvider(
+						this.jwtDecoder,
+						Arrays.asList(this.validator)
+				);
+	}
 
 	@Test
 	public void authenticateWhenJwtDecodesThenAuthenticationHasAttributesContainedInJwt() {
@@ -86,7 +96,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 		PreAuthenticatedAuthenticationToken token = this.authentication();
 
 		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
-		doThrow(OAuth2AuthenticationException.class).when(this.jwtValidator).validate(this.jwt);
+		doThrow(OAuth2AuthenticationException.class).when(this.validator).validate(this.jwt);
 
 		assertThatThrownBy(() -> this.provider.authenticate(token))
 				.isInstanceOf(OAuth2AuthenticationException.class);

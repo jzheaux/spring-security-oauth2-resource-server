@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.resourceserver.access.expression.OAut
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenValidator;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtTokenValidator;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenRequestMatcher;
@@ -391,15 +392,21 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 					new NimbusJwtDecoderLocalKeySupport(resolvers.values().iterator().next()));
 		}
 
-		JwtAccessTokenValidator validator =
-				this.jwtAccessTokenFormatConfigurer.validators.isEmpty() ?
-						new JwtAccessTokenValidator() :
-						new JwtAccessTokenValidator(this.jwtAccessTokenFormatConfigurer.validators.iterator().next());
+		if ( this.jwtAccessTokenFormatConfigurer.validators.isEmpty() ) {
+			Map<String, JwtTokenValidator> validators =
+					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, JwtTokenValidator.class);
+
+			this.jwtAccessTokenFormatConfigurer.validators.addAll(validators.values());
+		}
+
+		if ( this.jwtAccessTokenFormatConfigurer.validators.isEmpty() ) {
+			this.jwtAccessTokenFormatConfigurer.validators.add(new JwtAccessTokenValidator());
+		}
 
 		JwtAccessTokenAuthenticationProvider provider =
 			new JwtAccessTokenAuthenticationProvider(
 					this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder(),
-					validator);
+					this.jwtAccessTokenFormatConfigurer.validators);
 
 		provider.setAuthoritiesExtractor(this.jwtAccessTokenFormatConfigurer.extractor);
 

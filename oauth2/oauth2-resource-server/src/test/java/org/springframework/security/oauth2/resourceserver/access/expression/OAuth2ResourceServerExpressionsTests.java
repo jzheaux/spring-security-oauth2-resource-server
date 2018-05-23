@@ -39,7 +39,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenValidator;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.test.context.annotation.SecurityTestExecutionListeners;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -280,8 +279,7 @@ public class OAuth2ResourceServerExpressionsTests {
 
 		@Bean
 		AuthenticationProvider oauthResourceAuthenticationProvider() {
-			return new JwtAccessTokenAuthenticationProvider
-					(jwtDecoder(), new JwtAccessTokenValidator());
+			return new JwtAccessTokenAuthenticationProvider(jwtDecoder());
 		}
 
 		@Bean

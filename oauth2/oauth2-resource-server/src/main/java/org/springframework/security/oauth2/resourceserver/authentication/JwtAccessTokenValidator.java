@@ -35,20 +35,14 @@ import java.time.temporal.ChronoUnit;
  * Resource Server, there is a default clock leeway exercised when deciding if the current time is within the Jwt's
  * specified operating window
  *
- * <p>
- * Custom verification can be appended to instances of this class by providing a custom implementation of
- * {@link OAuth2TokenValidator}
- *
  * @author Josh Cummings
  * @since 5.1
  * @see Jwt
  * @see OAuth2TokenValidator
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  */
-public class JwtAccessTokenValidator implements OAuth2TokenValidator<Jwt> {
+public class JwtAccessTokenValidator implements JwtTokenValidator {
 	private static final Duration DEFAULT_MAX_CLOCK_SKEW = Duration.of(60, ChronoUnit.SECONDS);
-
-	private final OAuth2TokenValidator<Jwt> additionalValidation;
 
 	private final Duration maxClockSkew;
 
@@ -56,18 +50,12 @@ public class JwtAccessTokenValidator implements OAuth2TokenValidator<Jwt> {
 	 * A basic instance with no custom verification and the default max clock skew
 	 */
 	public JwtAccessTokenValidator() {
-		this((jwt) -> {});
+		this(DEFAULT_MAX_CLOCK_SKEW);
 	}
 
-	public JwtAccessTokenValidator(OAuth2TokenValidator<Jwt> jwtValidator) {
-		this(jwtValidator, DEFAULT_MAX_CLOCK_SKEW);
-	}
-
-	public JwtAccessTokenValidator(OAuth2TokenValidator<Jwt> jwtValidator, Duration maxClockSkew) {
-		Assert.notNull(jwtValidator, "jwtValidator cannot be null");
+	public JwtAccessTokenValidator(Duration maxClockSkew) {
 		Assert.notNull(maxClockSkew, "maxClockSkew cannot be null");
 
-		this.additionalValidation = jwtValidator;
 		this.maxClockSkew = maxClockSkew;
 	}
 
@@ -96,7 +84,5 @@ public class JwtAccessTokenValidator implements OAuth2TokenValidator<Jwt> {
 				throw new OAuth2AuthenticationException(invalidRequest, invalidRequest.toString());
 			}
 		}
-
-		additionalValidation.validate(jwt);
 	}
 }

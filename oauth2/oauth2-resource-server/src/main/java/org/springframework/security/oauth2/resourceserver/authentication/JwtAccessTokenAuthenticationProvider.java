@@ -20,9 +20,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.AuthoritiesExtractor;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -30,6 +32,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -49,23 +52,29 @@ import java.util.Collections;
  */
 public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvider {
 	private final JwtDecoder jwtDecoder;
-	private final JwtAccessTokenValidator jwtValidator;
+
+	private final OAuth2TokenValidator<Jwt> validator;
 
 	private AuthoritiesExtractor authoritiesExtractor = (authentication) -> Collections.emptyList();
 
 	private String scopeAttributeName;
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
-		this(jwtDecoder, new JwtAccessTokenValidator());
+		this(jwtDecoder, Arrays.asList(new JwtAccessTokenValidator()));
 	}
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
-												JwtAccessTokenValidator jwtValidator) {
+												Collection<OAuth2TokenValidator<Jwt>> validators) {
 		Assert.notNull(jwtDecoder, "jwtDecoder is required");
-		Assert.notNull(jwtValidator, "jwtValidator is required");
 
 		this.jwtDecoder = jwtDecoder;
-		this.jwtValidator = jwtValidator;
+
+		OAuth2TokenValidator<Jwt> delegate = new DelegatingOAuth2TokenValidator<>(validators);
+		if ( hasValidatorOfType(validators, JwtAccessTokenValidator.class) ) {
+			this.validator = delegate;
+		} else {
+			this.validator = new DelegatingOAuth2TokenValidator<>(new JwtAccessTokenValidator(), delegate);
+		}
 	}
 
 	@Override
@@ -86,7 +95,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 			throw new OAuth2AuthenticationException(invalidRequest, failed);
 		}
 
-		this.jwtValidator.validate(jwt);
+		this.validator.validate(jwt);
 
 		Collection<? extends GrantedAuthority> authorities =
 				this.authoritiesExtractor.extractAuthorities(new JwtAccessTokenAuthenticationToken(jwt));
@@ -113,5 +122,13 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 	public void setScopeAttributeName(String scopeAttributeName) {
 		this.scopeAttributeName = scopeAttributeName;
+	}
+
+	private boolean hasValidatorOfType(
+			Collection<OAuth2TokenValidator<Jwt>> validators,
+			Class<? extends OAuth2TokenValidator<Jwt>> target) {
+
+		return validators.stream()
+				.anyMatch(v -> target.isAssignableFrom(v.getClass()));
 	}
 }
