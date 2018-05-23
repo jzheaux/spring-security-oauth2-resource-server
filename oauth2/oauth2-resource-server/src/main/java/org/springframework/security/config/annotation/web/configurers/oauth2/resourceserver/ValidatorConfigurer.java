@@ -56,7 +56,7 @@ public final class ValidatorConfigurer {
 	}
 
 	public static class AudienceValidatorConfigurer {
-		public AudienceValidator isOneOf(String... audience) {
+		public AudienceValidator in(String... audience) {
 			return new AudienceValidator(audience);
 		}
 	}

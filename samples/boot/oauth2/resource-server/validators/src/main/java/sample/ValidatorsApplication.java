@@ -67,12 +67,13 @@ public class ValidatorsApplication {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
+
 			resourceServer(http)
 					.jwt()
 							.signature().keys(this.verify)
 							.validators(
 									timestamps().areValidWithin(30).seconds(),
-									audience().isOneOf("validator-app", "simple-app"),
+									audience().in("validator-app", "simple-app"),
 									issuer().is("https://uaa"),
 									claim("custom").is("harold")).and()
 					.and()

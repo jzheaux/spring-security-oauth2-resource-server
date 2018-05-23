@@ -30,6 +30,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,6 +46,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class ValidatorsApplicationTests {
+	private static final List<String> AUDIENCE = Arrays.asList("validator-app", "simple-app");
+	private static final String ISSUER = "https://uaa";
+	private static final String SUBJECT = "harold";
+	private static final String CUSTOM = "harold";
 
 	@Autowired
 	MockMvc mockMvc;
@@ -57,9 +63,9 @@ public class ValidatorsApplicationTests {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.scope("ok")
-				.claim(JwtClaimNames.ISS, "https://uaa")
-				.claim(JwtClaimNames.AUD, "validator-app")
-				.claim("custom", "harold")
+				.claim(JwtClaimNames.ISS, ISSUER)
+				.claim(JwtClaimNames.AUD, AUDIENCE.get(0))
+				.claim("custom", CUSTOM)
 				.sign("foo", this.sign)
 				.build();
 
@@ -67,6 +73,63 @@ public class ValidatorsApplicationTests {
 				.header("Authorization", "Bearer " + token))
 				.andExpect(content().string("ok"))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void performWhenTokenIsMissingIssuerThenErrorIndicates()
+		throws Exception {
+
+		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.scope("ok")
+				.claim(JwtClaimNames.AUD, AUDIENCE.get(0))
+				.claim("custom", CUSTOM)
+				.sign("foo", this.sign)
+				.build();
+
+		this.mockMvc.perform(get("/ok")
+				.header("Authorization", "Bearer " + token))
+				.andExpect(status().isUnauthorized())
+				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
+						"Bearer error=\"invalid_request\", " +
+								"error_description=\"Attribute [iss] must be in [" + ISSUER + "]\""));
+	}
+
+	@Test
+	public void performWhenTokenIsMissingAudienceThenErrorIndicates()
+			throws Exception {
+
+		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.scope("ok")
+				.claim(JwtClaimNames.ISS, ISSUER)
+				.claim("custom", CUSTOM)
+				.sign("foo", this.sign)
+				.build();
+
+		this.mockMvc.perform(get("/ok")
+				.header("Authorization", "Bearer " + token))
+				.andExpect(status().isUnauthorized())
+				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
+						"Bearer error=\"invalid_request\", " +
+								"error_description=\"Attribute [aud] must be in " + AUDIENCE + "\""));
+	}
+
+	@Test
+	public void performWhenTokenIsMissingCustomClaimThenErrorIndicates()
+			throws Exception {
+
+		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.scope("ok")
+				.claim(JwtClaimNames.ISS, ISSUER)
+				.claim(JwtClaimNames.AUD, AUDIENCE)
+				.sign("foo", this.sign)
+				.build();
+
+		this.mockMvc.perform(get("/ok")
+				.header("Authorization", "Bearer " + token))
+				.andExpect(status().isUnauthorized())
+				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
+						"Bearer error=\"invalid_request\", " +
+								"error_description=\"Attribute [custom] must be in [" + CUSTOM + "]\""));
 	}
 
 	@Test
@@ -104,7 +167,7 @@ public class ValidatorsApplicationTests {
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
 				.claim(JwtClaimNames.ISS, "https://uaa")
 				.claim(JwtClaimNames.AUD, "validator-app")
-				.claim("custom", "harold")
+				.claim("custom", CUSTOM)
 				.sign("foo", this.sign)
 				.build();
 
@@ -123,16 +186,16 @@ public class ValidatorsApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim(JwtClaimNames.ISS, "https://uaa")
-				.claim(JwtClaimNames.AUD, "validator-app")
-				.claim("custom", "harold")
-				.claim(JwtClaimNames.SUB, "harold")
+				.claim(JwtClaimNames.ISS, ISSUER)
+				.claim(JwtClaimNames.AUD, AUDIENCE.get(0))
+				.claim("custom", CUSTOM)
+				.claim(JwtClaimNames.SUB, SUBJECT)
 				.sign("foo", this.sign)
 				.build();
 
 		this.mockMvc.perform(get("/authenticated")
 				.header("Authorization", "Bearer " + token))
-				.andExpect(content().string("harold"))
+				.andExpect(content().string(SUBJECT))
 				.andExpect(status().isOk());
 	}
 

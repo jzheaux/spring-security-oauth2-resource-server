@@ -41,7 +41,7 @@ public class AudienceValidator implements JwtTokenValidator {
 	@Override
 	public void validate(Jwt token) throws OAuth2AuthenticationException {
 		if ( !containsAny(token.getAudience()) ) {
-			String error = String.format("Incorrect audience, must be one of %s", this.permitted);
+			String error = String.format("Attribute [aud] must be in %s", this.permitted);
 			throw new OAuth2AuthenticationException(
 					new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
 							error,
