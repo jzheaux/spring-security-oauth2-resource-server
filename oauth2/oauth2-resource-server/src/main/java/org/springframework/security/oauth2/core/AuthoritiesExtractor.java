@@ -22,5 +22,5 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 
 public interface AuthoritiesExtractor {
-	Collection<? extends GrantedAuthority> extractAuthorities(Authentication authentication);
+	Collection<GrantedAuthority> extractAuthorities(Authentication authentication);
 }

@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.core.AuthoritiesExtractor;
 import org.springframework.security.oauth2.resourceserver.authentication.AbstractOAuth2AccessTokenAuthenticationToken;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,7 @@ public class KeycloakAuthoritiesExtractor implements AuthoritiesExtractor {
 	private GrantedAuthoritiesMapper authoritiesMapper = authorities -> authorities;
 
 	@Override
-	public Collection<? extends GrantedAuthority> extractAuthorities(Authentication authentication) {
+	public Collection<GrantedAuthority> extractAuthorities(Authentication authentication) {
 		if ( authentication instanceof AbstractOAuth2AccessTokenAuthenticationToken ) {
 			Map<String, Object> attributes =
 					((AbstractOAuth2AccessTokenAuthenticationToken) authentication).getTokenAttributes();
@@ -56,7 +57,7 @@ public class KeycloakAuthoritiesExtractor implements AuthoritiesExtractor {
 							.map(SimpleGrantedAuthority::new)
 							.collect(Collectors.toList());
 
-			return this.authoritiesMapper.mapAuthorities(authorities);
+			return new ArrayList<>(this.authoritiesMapper.mapAuthorities(authorities));
 		}
 
 		return Collections.emptyList();
