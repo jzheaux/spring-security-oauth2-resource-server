@@ -76,6 +76,7 @@ public class CustomExpressionsApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.id()
 				.sign("foo", sign)
 				.build();
 

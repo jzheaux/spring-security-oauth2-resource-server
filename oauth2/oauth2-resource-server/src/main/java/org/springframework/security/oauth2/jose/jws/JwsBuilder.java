@@ -35,6 +35,7 @@ import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -73,6 +74,17 @@ public class JwsBuilder {
 	 */
 	public JwsBuilder claim(String name, Object value) {
 		this.payload.appendField(name, value);
+		return this;
+	}
+
+
+	/**
+	 * Add a 'jti' field to the JWT
+	 *
+	 * @return
+	 */
+	public JwsBuilder id() {
+		this.payload.appendField(JwtClaimNames.JTI, UUID.randomUUID().toString());
 		return this;
 	}
 
@@ -152,7 +164,9 @@ public class JwsBuilder {
 	 * @return
 	 */
 	public JwsBuilder sign(Key key) {
-		this.claim("scope", this.scope.stream().collect(Collectors.joining(" ")));
+		if ( !this.scope.isEmpty() ) {
+			this.claim("scope", this.scope.stream().collect(Collectors.joining(" ")));
+		}
 
 		this.jws =
 				new JWSObject(
