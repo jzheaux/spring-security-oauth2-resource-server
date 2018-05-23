@@ -55,4 +55,18 @@ public class JwsBuilderTests {
 
 		assertThat(decoded.getClaims().get("scope")).isNull();
 	}
+
+	@Test
+	public void serializeWhenSignedWithoutKidThenKidInstInResultingJwt() {
+		String encoded = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.id()
+				.sign(this.rsa.getPrivate())
+				.build();
+
+		Jwt decoded =
+				new NimbusJwtDecoderLocalKeySupport(header -> Arrays.asList(this.rsa.getPublic()))
+						.decode(encoded);
+
+		assertThat(decoded.getHeaders().get("kid")).isNull();
+	}
 }

@@ -78,6 +78,7 @@ public class LocalKeySetApplicationTests {
 		Map.Entry<String, KeyPair> key = sign.entrySet().iterator().next();
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.scope("not-ok")
 				.sign(key.getKey(), key.getValue().getPrivate())
 				.build();
 

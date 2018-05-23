@@ -93,6 +93,7 @@ public class RemoteKeySetApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.scope("not-ok")
 				.signWithAny(jwks)
 				.build();
 

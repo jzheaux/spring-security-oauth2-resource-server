@@ -87,6 +87,7 @@ public class CustomExpressionsApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.claim("custom-scope-attribute-name", "not-ok")
 				.sign("foo", sign)
 				.build();
 

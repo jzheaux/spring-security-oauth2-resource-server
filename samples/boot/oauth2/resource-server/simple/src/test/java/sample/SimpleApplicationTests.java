@@ -95,6 +95,7 @@ public class SimpleApplicationTests {
 		throws Exception {
 
 		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
+				.scope("not-ok")
 				.sign("foo", this.sign)
 				.build();
 
