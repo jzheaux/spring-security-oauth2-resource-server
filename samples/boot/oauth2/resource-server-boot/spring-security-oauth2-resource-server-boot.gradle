@@ -1,0 +1,10 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+dependencies {
+	compile project(':spring-security-oauth2-resource-server')
+
+	compile "org.springframework.security:spring-security-oauth2-core:$version"
+
+	compile "org.springframework.boot:spring-boot:$springBootVersion"
+	compile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
+}
