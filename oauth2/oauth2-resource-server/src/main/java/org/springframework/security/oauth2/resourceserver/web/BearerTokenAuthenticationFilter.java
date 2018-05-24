@@ -19,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.resourceserver.BearerTokenAuthenticationException;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
@@ -96,7 +97,9 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			Authentication authenticationResult = this.authenticationManager.authenticate(authenticationRequest);
 
-			SecurityContextHolder.getContext().setAuthentication(authenticationResult);
+			SecurityContext context = SecurityContextHolder.createEmptyContext();
+			context.setAuthentication(authenticationResult);
+			SecurityContextHolder.setContext(context);
 
 			filterChain.doFilter(request, response);
 
