@@ -31,7 +31,8 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,10 +42,10 @@ import java.util.stream.Collectors;
  * @author Josh Cummings
  */
 public class JwkSetBuilder {
-	private final Map<String, JWK> jwks;
+	private final List<JWK> jwks;
 
 	private JwkSetBuilder() {
-		this.jwks = new LinkedHashMap<>();
+		this.jwks = new ArrayList<>();
 	}
 
 	/**
@@ -57,26 +58,47 @@ public class JwkSetBuilder {
 	/**
 	 * Generate an EC JWK, adding it to the list of available JWKs
 	 *
+	 * @return
+	 */
+	public JwkSetBuilder withEc() {
+		this.jwks.add(ec().build());
+		return this;
+	}
+
+	/**
+	 * Generate an EC JWK, adding it to the list of available JWKs
+	 *
 	 * @param keyId
 	 * @return
 	 */
 	public JwkSetBuilder withEc(String keyId) {
+		this.jwks.add(ec().keyID(keyId).build());
+		return this;
+	}
+
+	private ECKey.Builder ec() {
 		try {
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
 			generator.initialize(521); // yes, 521
 			KeyPair keyPair = generator.generateKeyPair();
 
-			ECKey key = new ECKey.Builder(Curve.P_521, ((ECPublicKey) keyPair.getPublic()))
+			return new ECKey.Builder(Curve.P_521, ((ECPublicKey) keyPair.getPublic()))
 					.privateKey(keyPair.getPrivate())
-					.keyID(keyId)
-					.keyUse(KeyUse.SIGNATURE)
-					.build();
+					.keyUse(KeyUse.SIGNATURE);
 
-			this.jwks.put(keyId, key);
-			return this;
 		} catch ( NoSuchAlgorithmException ecMissing ) {
 			throw new IllegalStateException(ecMissing);
 		}
+	}
+
+	/**
+	 * Generate an RSA JWK, adding it to the list of available JWKs.
+	 *
+	 * @return
+	 */
+	public JwkSetBuilder withRsa() {
+		this.jwks.add(rsa().build());
+		return this;
 	}
 
 	/**
@@ -86,20 +108,19 @@ public class JwkSetBuilder {
 	 * @return
 	 */
 	public JwkSetBuilder withRsa(String keyId) {
+		this.jwks.add(rsa().keyID(keyId).build());
+		return this;
+	}
+
+	private RSAKey.Builder rsa() {
 		try {
 			KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
 			generator.initialize(2048);
 			KeyPair kp = generator.generateKeyPair();
 
-			RSAKey key = new RSAKey.Builder((RSAPublicKey) kp.getPublic())
+			return new RSAKey.Builder((RSAPublicKey) kp.getPublic())
 					.privateKey(kp.getPrivate())
-					.keyID(keyId)
-					.keyUse(KeyUse.SIGNATURE)
-					.build();
-
-			this.jwks.put(keyId, key);
-
-			return this;
+					.keyUse(KeyUse.SIGNATURE);
 		} catch ( NoSuchAlgorithmException rsaMissing ) {
 			throw new IllegalStateException(rsaMissing);
 		}
@@ -107,11 +128,16 @@ public class JwkSetBuilder {
 
 	/**
 	 * Look up JWK by {@code keyId}
+	 *
 	 * @param keyId
 	 * @return
 	 */
 	public Key getKeyById(String keyId) {
-		return this.extractKey(this.jwks.get(keyId));
+		return this.jwks.stream()
+				.filter(jwk -> keyId.equals(jwk.getKeyID()))
+				.findFirst()
+				.map(this::extractKey)
+				.orElse(null);
 	}
 
 	/**
@@ -120,10 +146,11 @@ public class JwkSetBuilder {
 	 * @return
 	 */
 	public Map<String, Key> getKeyMap() {
-		return
-				this.jwks.entrySet().stream()
-					.collect(Collectors.toMap(Map.Entry::getKey,
-												e -> this.extractKey(e.getValue())));
+		return this.jwks.stream()
+				.collect(
+						Collectors.toMap(
+								JWK::getKeyID,
+								this::extractKey));
 	}
 
 	/**
@@ -134,7 +161,7 @@ public class JwkSetBuilder {
 	 */
 	public String build() {
 		return new JSONObject()
-				.appendField("keys", this.jwks.values()).toJSONString();
+				.appendField("keys", this.jwks).toJSONString();
 	}
 
 	private Key extractKey(JWK jwk) {
