@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.security.oauth2.resourceserver;
-
-import org.springframework.security.oauth2.jwt.KeyProvider;
-
-import java.security.PublicKey;
-
-public class KeyDetails {
-	private KeyProvider<PublicKey> signature;
-
-	public KeyProvider<PublicKey> getSignature() {
-		return signature;
-	}
-
-	public void setSignature(KeyProvider<PublicKey> signature) {
-		this.signature = signature;
-	}
-}
+/**
+ * Auto-configuration for Spring Security's OAuth 2 Resource Server. This will be merged into Spring Boot 2.1.
+ */
+package org.springframework.boot.autoconfigure.security.oauth2.resourceserver;

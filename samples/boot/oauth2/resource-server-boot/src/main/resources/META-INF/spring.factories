@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.springframework.boot.security.oauth2.resourceserver.ResourceServerAutoConfiguration
+org.springframework.boot.autoconfigure.security.oauth2.resourceserver.OAuth2ResourceServerAutoConfiguration
