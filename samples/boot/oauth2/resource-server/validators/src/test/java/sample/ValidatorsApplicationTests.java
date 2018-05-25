@@ -91,7 +91,8 @@ public class ValidatorsApplicationTests {
 				.andExpect(status().isUnauthorized())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"invalid_request\", " +
-								"error_description=\"Attribute [iss] must be in [" + ISSUER + "]\""));
+								"error_description=\"Attribute [iss] must be in [" + ISSUER + "]\", " +
+								"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\""));
 	}
 
 	@Test
@@ -110,7 +111,8 @@ public class ValidatorsApplicationTests {
 				.andExpect(status().isUnauthorized())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"invalid_request\", " +
-								"error_description=\"Attribute [aud] must be in " + AUDIENCE + "\""));
+								"error_description=\"Attribute [aud] must be in " + AUDIENCE + "\", " +
+								"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\""));
 	}
 
 	@Test
@@ -129,7 +131,8 @@ public class ValidatorsApplicationTests {
 				.andExpect(status().isUnauthorized())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"invalid_request\", " +
-								"error_description=\"Attribute [custom] must be in [" + CUSTOM + "]\""));
+								"error_description=\"Attribute [custom] must be in [" + CUSTOM + "]\", " +
+								"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\""));
 	}
 
 	@Test

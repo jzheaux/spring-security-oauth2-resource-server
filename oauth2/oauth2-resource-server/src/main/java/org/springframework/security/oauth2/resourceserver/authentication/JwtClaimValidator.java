@@ -16,10 +16,9 @@
 
 package org.springframework.security.oauth2.resourceserver.authentication;
 
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidationResult;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,23 +28,23 @@ public class JwtClaimValidator implements JwtTokenValidator {
 	private final String name;
 	private final Collection<String> values;
 
-	public JwtClaimValidator(String name, String... value) {
+	private final OAuth2TokenValidationResult failure;
+
+	public JwtClaimValidator(String name, String... values) {
+		Assert.notNull(name, "name must not be null");
+
 		this.name = name;
-		this.values = Arrays.asList(value);
+		this.values = Arrays.asList(values);
+		this.failure = OAuth2TokenValidationResult.error("Attribute [%s] must be in %s", this.name, this.values);
 	}
 
 	@Override
-	public void validate(Jwt token) throws OAuth2AuthenticationException {
-		Optional.ofNullable(token.getClaims().get(name))
+	public OAuth2TokenValidationResult validate(Jwt token) {
+		return Optional
+				.ofNullable(token.getClaims().get(this.name))
 				.map(String::valueOf)
 				.filter(this.values::contains)
-				.orElseThrow(() -> {
-					OAuth2Error error = new OAuth2Error(
-							OAuth2ErrorCodes.INVALID_REQUEST,
-							String.format("Attribute [%s] must be in %s", this.name, this.values),
-							null);
-
-					return new OAuth2AuthenticationException(error, error.toString());
-				});
+				.map(value -> OAuth2TokenValidationResult.SUCCESS)
+				.orElse(this.failure);
 	}
 }

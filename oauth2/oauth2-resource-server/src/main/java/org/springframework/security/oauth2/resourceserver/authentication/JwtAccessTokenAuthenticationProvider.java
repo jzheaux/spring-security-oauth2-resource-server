@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidationResult;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -86,16 +87,16 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		try {
 			jwt = this.jwtDecoder.decode(String.valueOf(preAuthentication.getPrincipal()));
 		} catch (JwtException failed) {
-			OAuth2Error invalidRequest =
-					new OAuth2Error(
-							OAuth2ErrorCodes.INVALID_REQUEST,
-							failed.getMessage(),
-							"https://tools.ietf.org/html/rfc6750#section-3.1");
-
+			OAuth2Error invalidRequest = invalidRequest(failed.getMessage());
 			throw new OAuth2AuthenticationException(invalidRequest, failed);
 		}
 
-		this.validator.validate(jwt);
+		OAuth2TokenValidationResult result = this.validator.validate(jwt);
+
+		if ( !result.isSuccess() ) {
+			OAuth2Error error = invalidRequest(result.getFailureReasons());
+			throw new OAuth2AuthenticationException(error, error.toString());
+		}
 
 		Collection<? extends GrantedAuthority> authorities =
 				this.authoritiesExtractor.extractAuthorities(new JwtAccessTokenAuthenticationToken(jwt));
@@ -130,5 +131,13 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 		return validators.stream()
 				.anyMatch(v -> target.isAssignableFrom(v.getClass()));
+	}
+
+	private static OAuth2Error invalidRequest(String message) {
+		return new OAuth2Error(
+				OAuth2ErrorCodes.INVALID_REQUEST,
+				message,
+				"https://tools.ietf.org/html/rfc6750#section-3.1"
+		);
 	}
 }

@@ -16,9 +16,7 @@
 
 package org.springframework.security.oauth2.resourceserver.authentication;
 
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidationResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
 
@@ -29,6 +27,8 @@ import java.util.Collections;
 public class AudienceValidator implements JwtTokenValidator {
 	private Collection<String> permitted;
 
+	private OAuth2TokenValidationResult failure;
+
 	public AudienceValidator(String... permitted) {
 		this(Arrays.asList(permitted));
 	}
@@ -36,17 +36,16 @@ public class AudienceValidator implements JwtTokenValidator {
 	public AudienceValidator(Collection<String> permitted) {
 		Assert.notEmpty(permitted, "permitted must not be empty");
 		this.permitted = Collections.unmodifiableCollection(permitted);
+		this.failure = OAuth2TokenValidationResult.error("Attribute [aud] must be in %s", this.permitted);
 	}
 
 	@Override
-	public void validate(Jwt token) throws OAuth2AuthenticationException {
+	public OAuth2TokenValidationResult validate(Jwt token) {
 		if ( !containsAny(token.getAudience()) ) {
-			String error = String.format("Attribute [aud] must be in %s", this.permitted);
-			throw new OAuth2AuthenticationException(
-					new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST,
-							error,
-							null), error);
+			return this.failure;
 		}
+
+		return OAuth2TokenValidationResult.SUCCESS;
 	}
 
 	private boolean containsAny(Collection<String> audiences) {

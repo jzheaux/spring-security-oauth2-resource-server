@@ -23,7 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimNames;
 
 import java.time.Instant;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Josh Cummings
@@ -42,8 +42,8 @@ public class JwtAccessTokenValidatorTests {
 
 		JwtAccessTokenValidator validator = new JwtAccessTokenValidator();
 
-		assertThatThrownBy(() -> validator.validate(jwt))
-				.hasMessageContaining("Jwt expired at " + expiry);
+		assertThat(validator.validate(jwt).getFailureReasons())
+				.contains("Jwt expired at " + expiry);
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class JwtAccessTokenValidatorTests {
 
 		JwtAccessTokenValidator validator = new JwtAccessTokenValidator();
 
-		assertThatThrownBy(() -> validator.validate(jwt))
-				.hasMessageContaining("Jwt used before " + oneHourFromNow);
+		assertThat(validator.validate(jwt).getFailureReasons())
+				.contains("Jwt used before " + oneHourFromNow);
 	}
 }

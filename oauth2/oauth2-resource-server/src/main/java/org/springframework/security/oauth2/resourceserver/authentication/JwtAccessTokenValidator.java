@@ -16,9 +16,7 @@
 
 package org.springframework.security.oauth2.resourceserver.authentication;
 
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidationResult;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
@@ -60,16 +58,15 @@ public class JwtAccessTokenValidator implements JwtTokenValidator {
 	}
 
 	@Override
-	public void validate(Jwt jwt) throws OAuth2AuthenticationException {
+	public OAuth2TokenValidationResult validate(Jwt jwt) {
+		OAuth2TokenValidationResult.Builder result =
+				new OAuth2TokenValidationResult.Builder();
+
 		Instant expiry = jwt.getExpiresAt();
 
 		if ( expiry != null ) {
 			if ( Instant.now().minus(maxClockSkew).isAfter(expiry) ) {
-				OAuth2Error invalidRequest = new OAuth2Error(
-						OAuth2ErrorCodes.INVALID_REQUEST,
-						String.format("Jwt expired at %s", jwt.getExpiresAt()),
-						null);
-				throw new OAuth2AuthenticationException(invalidRequest, invalidRequest.toString());
+				result.error("Jwt expired at %s", jwt.getExpiresAt());
 			}
 		}
 
@@ -77,12 +74,10 @@ public class JwtAccessTokenValidator implements JwtTokenValidator {
 
 		if ( notBefore != null ) {
 			if ( Instant.now().plus(maxClockSkew).isBefore(notBefore) ) {
-				OAuth2Error invalidRequest = new OAuth2Error(
-						OAuth2ErrorCodes.INVALID_REQUEST,
-						String.format("Jwt used before %s", jwt.getNotBefore()),
-						null);
-				throw new OAuth2AuthenticationException(invalidRequest, invalidRequest.toString());
+				result.error("Jwt used before %s", jwt.getNotBefore());
 			}
 		}
+
+		return result.build();
 	}
 }

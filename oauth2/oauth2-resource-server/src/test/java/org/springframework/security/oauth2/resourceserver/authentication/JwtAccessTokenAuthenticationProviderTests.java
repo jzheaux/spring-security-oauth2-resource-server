@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
+import org.springframework.security.oauth2.core.OAuth2TokenValidationResult;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -35,7 +36,6 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 /**
@@ -73,6 +73,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 
 		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
 		when(this.jwt.getClaims()).thenReturn(claims);
+		when(this.validator.validate(this.jwt)).thenReturn(OAuth2TokenValidationResult.SUCCESS);
 
 		JwtAccessTokenAuthenticationToken jwtAccessTokenAuthentication =
 				(JwtAccessTokenAuthenticationToken) this.provider.authenticate(token);
@@ -96,7 +97,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 		PreAuthenticatedAuthenticationToken token = this.authentication();
 
 		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
-		doThrow(OAuth2AuthenticationException.class).when(this.validator).validate(this.jwt);
+		when(this.validator.validate(this.jwt)).thenReturn(OAuth2TokenValidationResult.error("reason"));
 
 		assertThatThrownBy(() -> this.provider.authenticate(token))
 				.isInstanceOf(OAuth2AuthenticationException.class);

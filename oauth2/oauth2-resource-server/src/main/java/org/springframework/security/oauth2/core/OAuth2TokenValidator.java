@@ -29,8 +29,8 @@ public interface OAuth2TokenValidator<T extends AbstractOAuth2Token> {
 	 * Verify the validity and/or constraints of the provided OAuth 2.0 Token.
 	 *
 	 * @param token an OAuth 2.0 token
-	 * @throws OAuth2AuthenticationException if an error occurs while attempting to verify the token attributes
+	 * @result OAuth2TokenValidationResult the success or failure detail of the validation
 	 */
-	void validate(T token) throws OAuth2AuthenticationException;
+	OAuth2TokenValidationResult validate(T token);
 
 }

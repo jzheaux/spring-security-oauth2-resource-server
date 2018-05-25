@@ -36,10 +36,15 @@ public class DelegatingOAuth2TokenValidator<T extends AbstractOAuth2Token> imple
 	}
 
 	@Override
-	public void validate(T token) throws OAuth2AuthenticationException {
+	public OAuth2TokenValidationResult validate(T token) {
+		OAuth2TokenValidationResult.Builder result =
+				new OAuth2TokenValidationResult.Builder();
+
 		for ( OAuth2TokenValidator<T> validator : this.validators ) {
-			validator.validate(token);
+			result.append(validator.validate(token));
 		}
+
+		return result.build();
 	}
 
 	public Collection<OAuth2TokenValidator<T>> getValidators() {
