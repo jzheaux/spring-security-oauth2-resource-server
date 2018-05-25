@@ -15,65 +15,14 @@
  */
 package sample;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer.UrlConfigurer.url;
 
 /**
  * @author Josh Cummings
  */
 @SpringBootApplication
 public class KeycloakApplication {
-
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Value("${spring.boot.oauth2.resourceserver.keycloak.certsEndpoint}") String certsEndpoint;
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-
-			resourceServer(http)
-					.jwt()
-							.signature()
-								.keys(url(this.certsEndpoint));
-		}
-
-		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer<>());
-		}
-	}
-
-	@Bean
-	public OAuth2Expressions oauth2() {
-		return new OAuth2ResourceServerExpressions() {
-			@Override
-			public Collection<String> scopes(Authentication authentication) {
-				Map<String, Object> attributes = super.attributes(authentication);
-
-				return Optional.ofNullable(attributes.get("realm_access"))
-						.map(realmAccess -> (Map<String, Object>) realmAccess)
-						.map(realmAccess -> realmAccess.get("roles"))
-						.map(roles -> (List<String>) roles)
-						.orElse(Collections.emptyList());
-			}
-		};
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(KeycloakApplication.class, args);

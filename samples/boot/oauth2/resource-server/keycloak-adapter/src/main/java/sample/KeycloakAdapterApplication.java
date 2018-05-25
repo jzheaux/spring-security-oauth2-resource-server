@@ -15,33 +15,8 @@
  */
 package sample;
 
-import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
-import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
-import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
-import org.springframework.security.oauth2.resourceserver.web.access.BearerTokenAccessDeniedHandler;
-import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This is a bit cobbled together, but it gives an idea of the current state of integration.
@@ -61,65 +36,6 @@ import java.util.stream.Collectors;
  */
 @SpringBootApplication
 public class KeycloakAdapterApplication {
-
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
-	class WebSecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
-
-		@Autowired
-		public void configureGlboal(AuthenticationManagerBuilder auth) {
-			auth.authenticationProvider(keycloakAuthenticationProvider());
-		}
-
-		@Override
-		protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-			return new NullAuthenticatedSessionStrategy();
-		}
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			super.configure(http);
-
-			http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER);
-			http.exceptionHandling().accessDeniedHandler(new BearerTokenAccessDeniedHandler());
-
-			http.authorizeRequests().anyRequest().authenticated();
-		}
-	}
-
-	@Bean
-	public KeycloakConfigResolver keycloakConfigResolver() {
-		return new KeycloakSpringBootConfigResolver();
-	}
-
-	@Bean
-	public OAuth2Expressions oauth2() {
-		return new OAuth2ResourceServerExpressions() {
-			@Override
-			public Collection<String> scopes(Authentication authentication) {
-				return keycloak(authentication)
-						.map(Authentication::getAuthorities)
-						.orElse(Collections.emptyList())
-						.stream()
-						.map(GrantedAuthority::getAuthority)
-						.collect(Collectors.toList());
-			}
-
-			@Override
-			protected JwtClaimAccessor jwt(Authentication authentication) {
-				return keycloak(authentication)
-						.map(KeycloakAuthenticationClaimAccessor::new)
-						.map(access -> (JwtClaimAccessor) access)
-						.orElse(() -> Collections.emptyMap());
-			}
-
-			private Optional<KeycloakAuthenticationToken> keycloak(Authentication authentication) {
-				return Optional.ofNullable(authentication)
-						.filter(a -> a instanceof KeycloakAuthenticationToken)
-						.map(a -> (KeycloakAuthenticationToken) a);
-			}
-		};
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(KeycloakAdapterApplication.class, args);

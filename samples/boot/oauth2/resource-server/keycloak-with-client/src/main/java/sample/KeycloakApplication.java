@@ -15,24 +15,8 @@
  */
 package sample;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
-import org.springframework.web.client.RestTemplate;
-
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer.UrlConfigurer.url;
-import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
 
 /**
  * @author Thomas Darimont
@@ -40,74 +24,6 @@ import static org.springframework.security.oauth2.client.web.OAuth2Authorization
  */
 @SpringBootApplication
 public class KeycloakApplication {
-
-	@Bean
-	SimpleAuthorityMapper authoritiesMapper() {
-		SimpleAuthorityMapper authoritiesMapper = new SimpleAuthorityMapper();
-		authoritiesMapper.setConvertToUpperCase(true);
-
-		return authoritiesMapper;
-	}
-
-	@Bean
-	KeycloakOAuth2UserService keycloakOidcUserService(OAuth2ClientProperties oauth2ClientProperties) {
-		String jwkSetUri = oauth2ClientProperties.getProvider().get("keycloak").getJwkSetUri();
-		return new KeycloakOAuth2UserService(authoritiesMapper(), new NimbusJwtDecoderJwkSupport(jwkSetUri));
-	}
-
-	@Bean
-	KeycloakLogoutHandler keycloakLogoutHandler() {
-		return new KeycloakLogoutHandler(new RestTemplate());
-	}
-
-	@Bean
-	KeycloakAuthoritiesExtractor keycloakOAuth2TokenAuthoritiesExtractor() {
-		KeycloakAuthoritiesExtractor extractor = new KeycloakAuthoritiesExtractor();
-
-		extractor.setAuthoritiesMapper(authoritiesMapper());
-
-		return extractor;
-	}
-
-	@Configuration
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Value("${kc.realm}") String realm;
-		@Value("${spring.security.oauth2.resourceserver.provider.keycloak.jwk-set-uri}") String jwkSetUri;
-
-		@Autowired
-		OAuth2ClientProperties oAuth2ClientProperties;
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			resourceServer(http)
-					.jwt()
-							.signature().keys(url(jwkSetUri))
-							.authoritiesExtractor(keycloakOAuth2TokenAuthoritiesExtractor())
-							.and()
-					.and()
-			.sessionManagement()
-					.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-					.and()
-			.authorizeRequests()
-					.anyRequest().permitAll()
-					.and()
-			.logout()
-					.addLogoutHandler(keycloakLogoutHandler())
-					.and()
-			.oauth2Login()
-					.userInfoEndpoint()
-							.oidcUserService(keycloakOidcUserService(oAuth2ClientProperties))
-					.and()
-			.loginPage(DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + realm);
-		}
-
-		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer<>());
-		}
-
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(KeycloakApplication.class, args);
 	}

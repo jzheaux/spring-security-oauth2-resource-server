@@ -15,52 +15,14 @@
  */
 package sample;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
-import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
-
-import java.security.PublicKey;
 
 /**
  * @author Josh Cummings
  */
 @SpringBootApplication
 public class CustomExpressionsApplication {
-
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Autowired
-		PublicKey verify;
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-
-			resourceServer(http)
-					.jwt()
-						.signature().key(this.verify)
-						.scopeAttributeName("custom-scope-attribute-name");
-		}
-
-		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer<>());
-		}
-	}
-
-	@Bean
-	public OAuth2ResourceServerExpressions oauth2() {
-		return new OAuth2ResourceServerExpressions(false);
-	}
-
-	@Bean
-	public CustomExpressions custom() {
-		return new CustomExpressions(oauth2());
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(CustomExpressionsApplication.class, args);

@@ -15,48 +15,11 @@
  */
 package sample;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 
 @SpringBootApplication
 public class Auth0Application {
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Autowired
-		PublicKey verify;
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			resourceServer(http);
-		}
-
-		private ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer<>());
-		}
-
-		@Bean
-		JwtDecoder jwtDecoder() {
-			JWTVerifier verifier = JWT.require(Algorithm.RSA256((RSAPublicKey) this.verify, null))
-					.withIssuer("rob").build();
-
-			return new Auth0JwtDecoder(verifier);
-		}
-	}
-
-
 
 	public static void main(String[] args) {
 		SpringApplication.run(Auth0Application.class, args);

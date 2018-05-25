@@ -15,41 +15,14 @@
  */
 package sample;
 
-import okhttp3.mockwebserver.MockWebServer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
-
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer.UrlConfigurer.url;
 
 /**
  * @author Josh Cummings
  */
 @SpringBootApplication
 public class RemoteKeySetApplication {
-
-	@EnableGlobalMethodSecurity(prePostEnabled = true)
-	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-		@Autowired
-		MockWebServer server;
-
-		@Override
-		protected void configure(HttpSecurity http) throws Exception {
-
-			resourceServer(http)
-					.jwt().signature()
-							.keys(url(this.server.url("/.well-known/jwks.json").toString())
-											.connectTimeout(30000L));
-		}
-
-		protected ResourceServerConfigurer<HttpSecurity> resourceServer(HttpSecurity http) throws Exception {
-			return http.apply(new ResourceServerConfigurer<>());
-		}
-	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(RemoteKeySetApplication.class, args);

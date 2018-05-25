@@ -34,10 +34,10 @@ import java.util.Optional;
 /**
  * @author Josh Cummings
  */
-public class KeycloakAuthenticationClaimAccessor implements JwtClaimAccessor {
+public class KeycloakAdapterAuthenticationClaimAccessor implements JwtClaimAccessor {
 	private AccessToken token;
 
-	public KeycloakAuthenticationClaimAccessor(KeycloakAuthenticationToken token) {
+	public KeycloakAdapterAuthenticationClaimAccessor(KeycloakAuthenticationToken token) {
 		Assert.notNull(token, "token must not be null");
 		Assert.isInstanceOf(SimpleKeycloakAccount.class, token.getDetails(),
 				"details must be of type SimpleKeycloakAccount");
