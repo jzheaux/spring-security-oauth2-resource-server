@@ -16,27 +16,15 @@
 
 package sample;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @RestController
 public class SimpleController {
-
-	@GetMapping("/ok")
-	@PreAuthorize("@oauth2.hasScope(authentication, 'ok')")
-	public String ok() {
-		return "ok";
-	}
-
 	@GetMapping("/authenticated")
-	public String okay(@AuthenticationPrincipal Authentication auth) {
-		if ( auth instanceof JwtAccessTokenAuthenticationToken) {
-			return ((JwtAccessTokenAuthenticationToken) auth).getJwt().getSubject();
-		}
-		return null;
+	public String okay(Principal subject) {
+		return String.format("The sub in the assertion is: %s", subject.getName());
 	}
 }

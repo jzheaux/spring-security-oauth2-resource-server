@@ -3,7 +3,10 @@ apply plugin: 'io.spring.convention.spring-module'
 dependencies {
 	compile project(':spring-security-oauth2-resource-server')
 
+	compile 'org.springframework:spring-test'
+
 	compile "org.springframework.security:spring-security-oauth2-core:$version"
 
 	compile 'com.beust:jcommander:1.72'
+
 }

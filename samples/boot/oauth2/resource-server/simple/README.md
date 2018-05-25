@@ -6,7 +6,7 @@ There are several ways that you can play with this sample:
 1. The Authorized Way
 ---------------------
 
-In the src/main/resources directory there is a token that already has the 'ok' scope granted. If you navigate in your
+In the src/main/resources directory there is valid bearer token. If you navigate in your
 terminal to that directory, e.g.
 
 ```bash
@@ -16,13 +16,13 @@ cd {location-of-sample}/src/main/resources
 then you will be able to do:
 
 ```bash
-curl -H "Authorization: Bearer `cat ok_token`" localhost:8080/ok
+curl -H "Authorization: Bearer `cat token`" localhost:8080/authenticated
 ```
 
 Or, you can copy-paste the value in directly:
 
 ```bash
-curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im9rIiwiZXhwIjozMzA2MzI3MDk1OCwianRpIjoiNmZkMzljMWYtMjE2OS00ODZiLWExMDUtMTBlNmU3NDMwNWM4In0.VKhal1JngnA8lG9CD14ezMUA_p-wr85cVw9jkxUcKtNLjrGcaWPHlAAGfF8TNK7RnikEQllvHOyXy3GoDgdnjcPGxcdPZ5gzSQtJEJUicOkjnsc_SQIq3Sw0Vxua5xkOUgM9_m3-2zjUibhLuMFMnWcdQHGetJx3OGbEU_ku3bBDm41zlEVQ1YcWszCz2jfD3EsrvWf2m_7xqQHwpz8hMF82l4ndAGNqFuQ-hos4JmwWc38HhYR3AsT6PvsiMueBFJh3OcC7KtP9en78Xvz_-q8i5lRH1XAwpLjvQfTSk0tZ68DFPYKk8SVhDf53VGPVVR8Lhoz60ZpsESr31l84ug" localhost:8080/ok
+curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJoYXJvbGQiLCJleHAiOjMzMDYzMjkwMzg5fQ.DHZOFSUe2xoH0_PWOX8hLo5jPeY2qZposRWPGGwEhBiPfNeUsj85pkmNCtQ3YZ-ENzfGHUYBi9-oCH4oQxrYjYJPs3N939ZQmPrRWeL38tQUx1z6j1kWMezEM59JC4ucnA1kIocxKnQliwHd8o6v-Tn38TdwzOj4YTVBcvBaM50ZmGGo3eShMJrILkLs5vAna6z073y_Qr999UxjdeowZeOl5oB2icsrbye3WYiZB3HGEcsz5M_VUAaqIXJoDrVdersxqsOw64ufXHzTq-Ox6wBrqftSY9h4R1zvsuqVjTxnFpC5JIB9GqI5yfPpVyWG2LG90oLo5W6iGTCMpoiIqQ" localhost:8080/authenticated
 ```
 
 2. The *Un*authorized Way
@@ -31,10 +31,11 @@ curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im9rIiwiZXhwIjoz
 You can also hit the app without a token:
 
 ```bash
-curl -v localhost:8080/ok
+curl -v localhost:8080/authenticated
 ```
 
 And see what happens.
+
 
 3. The DIY way - Generate Your Own Token
 ----------------------------------------

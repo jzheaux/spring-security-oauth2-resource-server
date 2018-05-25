@@ -18,23 +18,18 @@ package sample;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
-import org.springframework.security.oauth2.jose.jws.JwsBuilder;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-import java.security.PrivateKey;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static support.ResourceServerMockMvcRequestPostProcessors.bearerToken;
 
 /**
  * @author Josh Cummings
@@ -47,88 +42,14 @@ public class SimpleApplicationTests {
 	@Autowired
 	MockMvc mockMvc;
 
-	@Value("${spring.security.oauth2.authorizationserver.keys.signature}")
-	PrivateKey sign;
-
 	@Test
-	public void performWhenProperAuthorizationHeaderThenAllow()
+	public void performWhenValidTokenThenJwtCorrectlyParsed()
 		throws Exception {
 
-		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.scope("ok")
-				.sign("foo", this.sign)
-				.build();
+		Resource token = new ClassPathResource("token");
 
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
-				.andExpect(content().string("ok"))
+		this.mockMvc.perform(get("/authenticated").with(bearerToken(token)))
+				.andExpect(content().string(containsString("harold")))
 				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void performWhenProperAuthorizationHeaderThenNoSessionCreated()
-			throws Exception {
-
-		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.scope("ok")
-				.sign("foo", this.sign)
-				.build();
-
-		MvcResult result =
-				this.mockMvc.perform(get("/ok")
-					.header("Authorization", "Bearer " + token))
-					.andReturn();
-
-		assertThat(result.getRequest().getSession(false)).isNull();
-	}
-
-	@Test
-	public void performWhenMissingAuthorizationHeaderThenUnauthorized()
-		throws Exception {
-
-		this.mockMvc.perform(get("/ok"))
-				.andExpect(status().isUnauthorized());
-	}
-
-	@Test
-	public void performWhenInsufficientScopeThenForbidden()
-		throws Exception {
-
-		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.scope("not-ok")
-				.sign("foo", this.sign)
-				.build();
-
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
-				.andExpect(status().isForbidden())
-				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
-						"Bearer error=\"insufficient_scope\", " +
-								"error_description=\"Resource requires any or all of these scopes [ok]\", " +
-								"error_uri=\"https://tools.ietf.org/html/rfc6750#section-3.1\", " +
-								"scope=\"ok\""));
-	}
-
-	@Test
-	public void performWhenProperAuthorizationHeaderThenJwtCorrectlyParsed()
-		throws Exception {
-
-		String token = JwsBuilder.withAlgorithm(JwsAlgorithms.RS256)
-				.claim("sub", "harold")
-				.sign("foo", this.sign)
-				.build();
-
-		this.mockMvc.perform(get("/authenticated")
-				.header("Authorization", "Bearer " + token))
-				.andExpect(content().string("harold"))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void performWhenMissingAuthorizationHeaderAndOnlyAuthenticationRequiredThenForbidden()
-			throws Exception {
-
-		this.mockMvc.perform(get("/authenticated"))
-				.andExpect(status().isUnauthorized());
 	}
 }

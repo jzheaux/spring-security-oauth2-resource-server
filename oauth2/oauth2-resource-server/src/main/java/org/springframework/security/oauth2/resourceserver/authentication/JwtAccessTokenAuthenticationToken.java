@@ -21,6 +21,7 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * An implementation of an {@link AbstractOAuth2AccessTokenAuthenticationToken}
@@ -73,5 +74,12 @@ public class JwtAccessTokenAuthenticationToken extends AbstractOAuth2AccessToken
 	@Override
 	public Object getPrincipal() {
 		return this.getJwt();
+	}
+
+	@Override
+	public String getName() {
+		return Optional
+				.ofNullable(this.jwt.getSubject())
+				.orElse(super.getName());
 	}
 }
