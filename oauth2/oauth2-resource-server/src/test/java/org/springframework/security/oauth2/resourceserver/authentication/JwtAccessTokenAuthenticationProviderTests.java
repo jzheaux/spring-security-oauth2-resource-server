@@ -27,7 +27,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationToken;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 
 	@Test
 	public void authenticateWhenJwtDecodesThenAuthenticationHasAttributesContainedInJwt() {
-		PreAuthenticatedAuthenticationToken token = this.authentication();
+		BearerTokenAuthenticationToken token = this.authentication();
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("name", "value");
 
@@ -83,7 +83,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 
 	@Test
 	public void authenticateWhenJwtDecodeFailsThenRespondsWithInvalidRequest() {
-		PreAuthenticatedAuthenticationToken token = this.authentication();
+		BearerTokenAuthenticationToken token = this.authentication();
 
 		when(this.jwtDecoder.decode("token")).thenThrow(JwtException.class);
 
@@ -94,7 +94,7 @@ public class JwtAccessTokenAuthenticationProviderTests {
 
 	@Test
 	public void authenticateWhenJwtValidatorFailsThenResponseWithInvalidRequest() {
-		PreAuthenticatedAuthenticationToken token = this.authentication();
+		BearerTokenAuthenticationToken token = this.authentication();
 
 		when(this.jwtDecoder.decode("token")).thenReturn(this.jwt);
 		when(this.validator.validate(this.jwt)).thenReturn(OAuth2TokenValidationResult.error("reason"));
@@ -103,8 +103,8 @@ public class JwtAccessTokenAuthenticationProviderTests {
 				.isInstanceOf(OAuth2AuthenticationException.class);
 	}
 
-	private PreAuthenticatedAuthenticationToken authentication() {
-		return new PreAuthenticatedAuthenticationToken("token", null);
+	private BearerTokenAuthenticationToken authentication() {
+		return new BearerTokenAuthenticationToken("token");
 	}
 
 	private Predicate<? super Throwable> errorCode(String errorCode) {

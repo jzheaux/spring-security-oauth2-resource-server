@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,7 +30,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BearerTokenAuthenticationFilterTests {
@@ -58,8 +59,8 @@ public class BearerTokenAuthenticationFilterTests {
 
 		this.filter.doFilterInternal(this.request, null, this.filterChain);
 
-		ArgumentCaptor<PreAuthenticatedAuthenticationToken> captor =
-				ArgumentCaptor.forClass(PreAuthenticatedAuthenticationToken.class);
+		ArgumentCaptor<BearerTokenAuthenticationToken> captor =
+				ArgumentCaptor.forClass(BearerTokenAuthenticationToken.class);
 
 		verify(this.authenticationManager).authenticate(captor.capture());
 

@@ -90,7 +90,7 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		PreAuthenticatedAuthenticationToken authenticationRequest = new PreAuthenticatedAuthenticationToken(token, null);
+		BearerTokenAuthenticationToken authenticationRequest = new BearerTokenAuthenticationToken(token);
 
 		authenticationRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
 
@@ -102,9 +102,6 @@ public class BearerTokenAuthenticationFilter extends OncePerRequestFilter {
 			SecurityContextHolder.setContext(context);
 
 			filterChain.doFilter(request, response);
-
-			// this is currently a point of debate as to which kind of exception should be caught/thrown in this flow
-			// {@see JwtVerificationException} for details.
 		} catch (AuthenticationException failed) {
 			SecurityContextHolder.clearContext();
 

@@ -29,7 +29,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationToken;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -80,12 +80,12 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		PreAuthenticatedAuthenticationToken preAuthentication =
-				(PreAuthenticatedAuthenticationToken) authentication;
+		BearerTokenAuthenticationToken bearer =
+				(BearerTokenAuthenticationToken) authentication;
 
 		Jwt jwt;
 		try {
-			jwt = this.jwtDecoder.decode(String.valueOf(preAuthentication.getPrincipal()));
+			jwt = this.jwtDecoder.decode(String.valueOf(bearer.getToken()));
 		} catch (JwtException failed) {
 			OAuth2Error invalidRequest = invalidRequest(failed.getMessage());
 			throw new OAuth2AuthenticationException(invalidRequest, failed);
@@ -108,12 +108,14 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 			token.setScopeAttributeName(this.scopeAttributeName);
 		}
 
+		token.setDetails(bearer.getDetails());
+
 		return token;
 	}
 
 	@Override
 	public boolean supports(Class<?> authentication) {
-		return PreAuthenticatedAuthenticationToken.class.isAssignableFrom(authentication);
+		return BearerTokenAuthenticationToken.class.isAssignableFrom(authentication);
 	}
 
 	public void setAuthoritiesExtractor(AuthoritiesExtractor authoritiesExtractor) {
