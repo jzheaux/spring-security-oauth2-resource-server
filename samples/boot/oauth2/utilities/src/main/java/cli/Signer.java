@@ -29,6 +29,7 @@ import support.Keys;
 
 import java.security.Key;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,11 +42,11 @@ public class Signer {
 		@Override
 		public Instant convert(String value) {
 			if ( "min".equalsIgnoreCase(value) ) {
-				return Instant.MIN;
+				return Instant.now().minus(1000*365, ChronoUnit.DAYS);
 			}
 
 			if ("max".equalsIgnoreCase(value)) {
-				return Instant.MAX;
+				return Instant.now().plus(1000*365, ChronoUnit.DAYS);
 			}
 
 			if ("now".equalsIgnoreCase(value) ) {

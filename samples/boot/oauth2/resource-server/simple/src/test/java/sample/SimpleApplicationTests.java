@@ -47,7 +47,7 @@ public class SimpleApplicationTests {
 	@Autowired
 	MockMvc mockMvc;
 
-	@Value("${jwt.signing.key}")
+	@Value("${spring.security.oauth2.authorizationserver.keys.signature}")
 	PrivateKey sign;
 
 	@Test
