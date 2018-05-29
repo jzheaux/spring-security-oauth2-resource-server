@@ -48,7 +48,7 @@ public class SimpleApplicationTests {
 
 		Resource token = new ClassPathResource("token");
 
-		this.mockMvc.perform(get("/authenticated").with(bearerToken(token)))
+		this.mockMvc.perform(get("/hello").with(bearerToken(token)))
 				.andExpect(content().string(containsString("harold")))
 				.andExpect(status().isOk());
 	}

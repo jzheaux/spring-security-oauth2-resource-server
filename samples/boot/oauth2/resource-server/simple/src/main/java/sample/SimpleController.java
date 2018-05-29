@@ -23,8 +23,8 @@ import java.security.Principal;
 
 @RestController
 public class SimpleController {
-	@GetMapping("/authenticated")
-	public String okay(Principal subject) {
-		return String.format("The sub in the assertion is: %s", subject.getName());
+	@GetMapping("/hello")
+	public String hello(Principal subject) {
+		return String.format("Hello, %s!", subject.getName());
 	}
 }
