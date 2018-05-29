@@ -65,7 +65,7 @@ public class OAuth2ResourceServerWebSecurityConfiguraion {
 			}
 
 			if ( StringUtils.hasText(details.getBaseUri()) ) {
-				resourceServer.jwt().validators(
+				resourceServer.jwt().validator(
 						new JwtClaimValidator(
 								JwtClaimNames.ISS,
 								details.getBaseUri())

@@ -135,8 +135,8 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			return this;
 		}
 
-		public JwtAccessTokenFormatConfigurer validators(OAuth2TokenValidator<Jwt>... validators) {
-			this.validators = Arrays.asList(validators);
+		public JwtAccessTokenFormatConfigurer validator(OAuth2TokenValidator<Jwt> validator) {
+			this.validators.add(validator);
 			return this;
 		}
 

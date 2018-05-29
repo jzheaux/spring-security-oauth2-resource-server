@@ -21,14 +21,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ResourceServerConfigurer;
+import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.KeyProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.AudienceValidator;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenValidator;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtClaimValidator;
 
 import java.security.PublicKey;
-
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ValidatorConfigurer.audience;
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ValidatorConfigurer.claim;
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ValidatorConfigurer.issuer;
-import static org.springframework.security.config.annotation.web.configurers.oauth2.resourceserver.ValidatorConfigurer.timestamps;
+import java.time.Duration;
 
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ValidatorsSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -43,12 +43,11 @@ public class ValidatorsSecurityConfig extends WebSecurityConfigurerAdapter {
 			.apply(new ResourceServerConfigurer<>())
 				.jwt()
 					.signature().keys(this.verify)
-					.validators(
-						timestamps().areValidWithin(30).seconds(),
-						audience().in("validator-app", "simple-app"),
-						issuer().is("https://uaa"),
-						claim("custom").is("harold")).and()
-					.and()
+					.validator(new JwtAccessTokenValidator(Duration.ofSeconds(30)))
+					.validator(new AudienceValidator("validator-app", "simple-app"))
+					.validator(new JwtClaimValidator(JwtClaimNames.ISS, "https://uaa"))
+					.validator(new JwtClaimValidator("custom", "harold")).and()
+				.and()
 			.authorizeRequests()
 				.anyRequest().authenticated();
 		// @formatter:on
