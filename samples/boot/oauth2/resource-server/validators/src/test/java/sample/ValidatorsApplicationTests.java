@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static support.ResourceServerMockMvcRequestPostProcessors.bearerToken;
 
 /**
  * @author Josh Cummings
@@ -66,11 +67,10 @@ public class ValidatorsApplicationTests {
 				.claim(JwtClaimNames.ISS, ISSUER)
 				.claim(JwtClaimNames.AUD, AUDIENCE.get(0))
 				.claim("custom", CUSTOM)
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
+		this.mockMvc.perform(get("/ok").with(bearerToken(token)))
 				.andExpect(content().string("ok"))
 				.andExpect(status().isOk());
 	}
@@ -83,11 +83,10 @@ public class ValidatorsApplicationTests {
 				.scope("ok")
 				.claim(JwtClaimNames.AUD, AUDIENCE.get(0))
 				.claim("custom", CUSTOM)
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
+		this.mockMvc.perform(get("/ok").with(bearerToken(token)))
 				.andExpect(status().isUnauthorized())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"invalid_request\", " +
@@ -103,11 +102,10 @@ public class ValidatorsApplicationTests {
 				.scope("ok")
 				.claim(JwtClaimNames.ISS, ISSUER)
 				.claim("custom", CUSTOM)
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
+		this.mockMvc.perform(get("/ok").with(bearerToken(token)))
 				.andExpect(status().isUnauthorized())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"invalid_request\", " +
@@ -123,11 +121,10 @@ public class ValidatorsApplicationTests {
 				.scope("ok")
 				.claim(JwtClaimNames.ISS, ISSUER)
 				.claim(JwtClaimNames.AUD, AUDIENCE)
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
+		this.mockMvc.perform(get("/ok").with(bearerToken(token)))
 				.andExpect(status().isUnauthorized())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"invalid_request\", " +
@@ -144,12 +141,11 @@ public class ValidatorsApplicationTests {
 				.claim(JwtClaimNames.ISS, "https://uaa")
 				.claim(JwtClaimNames.AUD, "validator-app")
 				.claim("custom", "harold")
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
 		MvcResult result =
-				this.mockMvc.perform(get("/ok")
-					.header("Authorization", "Bearer " + token))
+				this.mockMvc.perform(get("/ok").with(bearerToken(token)))
 					.andReturn();
 
 		assertThat(result.getRequest().getSession(false)).isNull();
@@ -171,11 +167,10 @@ public class ValidatorsApplicationTests {
 				.claim(JwtClaimNames.ISS, "https://uaa")
 				.claim(JwtClaimNames.AUD, "validator-app")
 				.claim("custom", CUSTOM)
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
-		this.mockMvc.perform(get("/ok")
-				.header("Authorization", "Bearer " + token))
+		this.mockMvc.perform(get("/ok").with(bearerToken(token)))
 				.andExpect(status().isForbidden())
 				.andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE,
 						"Bearer error=\"insufficient_scope\", " +
@@ -193,11 +188,10 @@ public class ValidatorsApplicationTests {
 				.claim(JwtClaimNames.AUD, AUDIENCE.get(0))
 				.claim("custom", CUSTOM)
 				.claim(JwtClaimNames.SUB, SUBJECT)
-				.sign("foo", this.sign)
+				.sign(this.sign)
 				.build();
 
-		this.mockMvc.perform(get("/authenticated")
-				.header("Authorization", "Bearer " + token))
+		this.mockMvc.perform(get("/authenticated").with(bearerToken(token)))
 				.andExpect(content().string(SUBJECT))
 				.andExpect(status().isOk());
 	}
