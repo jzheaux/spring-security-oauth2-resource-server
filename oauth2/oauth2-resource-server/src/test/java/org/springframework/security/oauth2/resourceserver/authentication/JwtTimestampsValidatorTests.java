@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Josh Cummings
  */
-public class JwtAccessTokenValidatorTests {
+public class JwtTimestampsValidatorTests {
 	@Test
 	public void validateWhenJwtIsExpiredThenErrorMessageIndicatesExpirationTime() {
 		Instant expiry = Instant.MIN.plusSeconds(1);
@@ -40,7 +40,7 @@ public class JwtAccessTokenValidatorTests {
 				Maps.newHashMap("alg", JwsAlgorithms.RS256),
 				Maps.newHashMap(JwtClaimNames.EXP, expiry));
 
-		JwtAccessTokenValidator validator = new JwtAccessTokenValidator();
+		JwtTimestampsValidator validator = new JwtTimestampsValidator();
 
 		assertThat(validator.validate(jwt).getFailureReasons())
 				.contains("Jwt expired at " + expiry);
@@ -57,7 +57,7 @@ public class JwtAccessTokenValidatorTests {
 				Maps.newHashMap("alg", JwsAlgorithms.RS256),
 				Maps.newHashMap(JwtClaimNames.NBF, oneHourFromNow));
 
-		JwtAccessTokenValidator validator = new JwtAccessTokenValidator();
+		JwtTimestampsValidator validator = new JwtTimestampsValidator();
 
 		assertThat(validator.validate(jwt).getFailureReasons())
 				.contains("Jwt used before " + oneHourFromNow);

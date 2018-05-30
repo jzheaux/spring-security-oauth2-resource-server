@@ -47,7 +47,7 @@ import java.util.Collections;
  * @author Josh Cummings
  * @author Joe Grandja
  * @since 5.1
- * @see JwtAccessTokenValidator
+ * @see JwtTimestampsValidator
  * @see AuthenticationProvider
  * @see JwtDecoder
  */
@@ -61,7 +61,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 	private String scopeAttributeName;
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
-		this(jwtDecoder, Arrays.asList(new JwtAccessTokenValidator()));
+		this(jwtDecoder, Arrays.asList(new JwtTimestampsValidator()));
 	}
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
@@ -71,10 +71,10 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		this.jwtDecoder = jwtDecoder;
 
 		OAuth2TokenValidator<Jwt> delegate = new DelegatingOAuth2TokenValidator<>(validators);
-		if ( hasValidatorOfType(validators, JwtAccessTokenValidator.class) ) {
+		if ( hasValidatorOfType(validators, JwtTimestampsValidator.class) ) {
 			this.validator = delegate;
 		} else {
-			this.validator = new DelegatingOAuth2TokenValidator<>(new JwtAccessTokenValidator(), delegate);
+			this.validator = new DelegatingOAuth2TokenValidator<>(new JwtTimestampsValidator(), delegate);
 		}
 	}
 

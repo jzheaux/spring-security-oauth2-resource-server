@@ -66,6 +66,9 @@ public class NimbusJwtDecoderLocalKeySupport implements JwtDecoder {
 		ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
 		jwtProcessor.setJWSKeySelector(jwsKeySelector);
 
+		// Spring Security validates this claim independent of Nimbus
+		jwtProcessor.setJWTClaimsSetVerifier((claims, context) -> {});
+
 		return new NimbusJwtDecoder(jwtProcessor);
 	}
 }

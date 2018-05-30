@@ -24,7 +24,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.res
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.jwt.KeyProvider;
 import org.springframework.security.oauth2.resourceserver.authentication.AudienceValidator;
-import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenValidator;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtTimestampsValidator;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtClaimValidator;
 
 import java.security.PublicKey;
@@ -43,7 +43,7 @@ public class ValidatorsSecurityConfig extends WebSecurityConfigurerAdapter {
 			.apply(new ResourceServerConfigurer<>())
 				.jwt()
 					.signature().keys(this.verify)
-					.validator(new JwtAccessTokenValidator(Duration.ofSeconds(30)))
+					.validator(new JwtTimestampsValidator(Duration.ofSeconds(30)))
 					.validator(new AudienceValidator("validator-app", "simple-app"))
 					.validator(new JwtClaimValidator(JwtClaimNames.ISS, "https://uaa"))
 					.validator(new JwtClaimValidator("custom", "harold")).and()

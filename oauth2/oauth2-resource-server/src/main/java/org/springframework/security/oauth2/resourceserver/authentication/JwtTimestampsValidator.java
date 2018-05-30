@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -39,19 +40,21 @@ import java.time.temporal.ChronoUnit;
  * @see OAuth2TokenValidator
  * @see <a target="_blank" href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>
  */
-public class JwtAccessTokenValidator implements JwtTokenValidator {
+public class JwtTimestampsValidator implements JwtTokenValidator {
 	private static final Duration DEFAULT_MAX_CLOCK_SKEW = Duration.of(60, ChronoUnit.SECONDS);
 
 	private final Duration maxClockSkew;
 
+	private Clock clock = Clock.systemUTC();
+
 	/**
 	 * A basic instance with no custom verification and the default max clock skew
 	 */
-	public JwtAccessTokenValidator() {
+	public JwtTimestampsValidator() {
 		this(DEFAULT_MAX_CLOCK_SKEW);
 	}
 
-	public JwtAccessTokenValidator(Duration maxClockSkew) {
+	public JwtTimestampsValidator(Duration maxClockSkew) {
 		Assert.notNull(maxClockSkew, "maxClockSkew cannot be null");
 
 		this.maxClockSkew = maxClockSkew;
@@ -65,7 +68,7 @@ public class JwtAccessTokenValidator implements JwtTokenValidator {
 		Instant expiry = jwt.getExpiresAt();
 
 		if ( expiry != null ) {
-			if ( Instant.now().minus(maxClockSkew).isAfter(expiry) ) {
+			if ( Instant.now(this.clock).minus(maxClockSkew).isAfter(expiry) ) {
 				result.error("Jwt expired at %s", jwt.getExpiresAt());
 			}
 		}
@@ -73,11 +76,22 @@ public class JwtAccessTokenValidator implements JwtTokenValidator {
 		Instant notBefore = jwt.getNotBefore();
 
 		if ( notBefore != null ) {
-			if ( Instant.now().plus(maxClockSkew).isBefore(notBefore) ) {
+			if ( Instant.now(this.clock).plus(maxClockSkew).isBefore(notBefore) ) {
 				result.error("Jwt used before %s", jwt.getNotBefore());
 			}
 		}
 
 		return result.build();
+	}
+
+	/**
+	 * Specify the {@link Clock} used by {@link Instant} for assessing
+	 * timestamp validity
+	 *
+	 * @param clock
+	 */
+	public void setClock(Clock clock) {
+		Assert.notNull(clock, "clock cannot be null");
+		this.clock = clock;
 	}
 }
