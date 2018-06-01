@@ -24,9 +24,7 @@ import org.springframework.util.Assert;
 
 import java.security.Key;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * A {@link JwtDecoder} for Nimbus for locally-configured verification keys.
@@ -36,6 +34,14 @@ import java.util.Map;
  */
 public class NimbusJwtDecoderLocalKeySupport implements JwtDecoder {
 	private final NimbusJwtDecoder decoder;
+
+	public NimbusJwtDecoderLocalKeySupport(Key key) {
+		this(key, JwsAlgorithms.RS256);
+	}
+
+	public NimbusJwtDecoderLocalKeySupport(Key key, String jwsAlgorithm) {
+		this((header) -> Arrays.asList(key), jwsAlgorithm);
+	}
 
 	public NimbusJwtDecoderLocalKeySupport(KeyProvider provider) {
 		this(provider, JwsAlgorithms.RS256);
@@ -52,14 +58,6 @@ public class NimbusJwtDecoderLocalKeySupport implements JwtDecoder {
 	@Override
 	public Jwt decode(String token) throws JwtException {
 		return this.decoder.decode(token);
-	}
-
-	private JWSKeySelector<SecurityContext> selector(Map<String, Key> keys, String jwsAlgorithm) {
-		return (jwsHeader, context) ->
-				jwsHeader.getAlgorithm().toString().equals(jwsAlgorithm) &&
-						keys.containsKey(jwsHeader.getKeyID()) ?
-							Arrays.asList(keys.get(jwsHeader.getKeyID())) :
-							Collections.emptyList();
 	}
 
 	private NimbusJwtDecoder delegate(JWSKeySelector<SecurityContext> jwsKeySelector) {
