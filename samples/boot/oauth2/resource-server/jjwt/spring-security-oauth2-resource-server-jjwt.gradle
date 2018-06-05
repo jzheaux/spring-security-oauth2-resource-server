@@ -1,0 +1,17 @@
+apply plugin: 'io.spring.convention.spring-sample-boot'
+
+dependencies {
+	compile project(':spring-security-oauth2-resource-server')
+	compile project(':spring-security-oauth2-resource-server-boot')
+	compile project(':spring-security-oauth2-utilities')
+
+	compile 'org.springframework.boot:spring-boot-starter-security'
+	compile 'org.springframework.boot:spring-boot-starter-web'
+
+	compile "org.springframework.security:spring-security-oauth2-core:$version"
+
+	compile 'io.jsonwebtoken:jjwt:0.9.0'
+
+	testCompile 'commons-io:commons-io'
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
