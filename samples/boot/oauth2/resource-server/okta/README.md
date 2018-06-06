@@ -19,12 +19,12 @@ curl -X POST \
   -d "grant_type=client_credentials"
 ```
 
-As an example, here is a curl that I might do against an imaginary Okta instance:
+As an example, here is a curl that I might do against an Okta instance:
 
 ```bash
 curl -X POST \
-  --user 2i3noN23WeQgob9820:k2n3kndafvno3u4ntrou234n \
-  https://dev-123456.oktapreview.com/oauth2/default/v1/token \
+  --user 0oaf5u5g4m6CW4x6z0h7:HR7edRoo3glhF06HTxonOKZvO4I2BWYcC_ocOHlv \
+  https://dev-805262.oktapreview.com/oauth2/default/v1/token \
   -d "grant_type=client_credentials"
 ```
 
@@ -40,7 +40,7 @@ Note the access token.
 
 ```bash
 curl -H "Authorization: Bearer {base64-encoded-jwt-token}" \
-  localhost:8080/authenticated
+  localhost:8080/hello
 ```
 
 This will result in a response that contains the value of "sub" from the token.

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-okta.uri: https://your-okta-instance.oktapreview.com/oauth2/default
+okta.uri: https://dev-805262.oktapreview.com/oauth2/default
 
 spring:
   security:
