@@ -28,6 +28,8 @@ import java.util.stream.Stream;
  */
 public interface ScopeClaimAccessor extends ClaimAccessor {
 
+	String DEFAULT_SCOPE_ATTRIBUTE_NAME = "scope";
+
 	/**
 	 * Coerce a claim into a list of strings, delimiting the string claim by a
 	 * {@code delimiter}, if the claim is not already a {@link List}.

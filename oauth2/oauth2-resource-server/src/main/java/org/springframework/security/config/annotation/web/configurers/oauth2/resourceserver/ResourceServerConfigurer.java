@@ -27,7 +27,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.core.AuthoritiesExtractor;
+import org.springframework.security.oauth2.core.AuthoritiesPopulator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.jwt.SingleKeyProvider;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2Expressions;
 import org.springframework.security.oauth2.resourceserver.access.expression.OAuth2ResourceServerExpressions;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationProvider;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAuthoritiesPopulator;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtTimestampsValidator;
 import org.springframework.security.oauth2.resourceserver.authentication.JwtTokenValidator;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationEntryPoint;
@@ -62,7 +63,6 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -116,7 +116,7 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 	public class JwtAccessTokenFormatConfigurer {
 		protected JwtDecoderConfigurer jwtDecoder = new JwtDecoderConfigurer();
 		private Collection<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
-		private AuthoritiesExtractor extractor = (authentication) -> Collections.emptyList();
+		private AuthoritiesPopulator populator;
 		private String scopeAttributeName;
 
 		public JwtAccessTokenFormatConfigurer() {}
@@ -125,8 +125,8 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 			this.jwtDecoder.decoder(decoder);
 		}
 
-		public JwtAccessTokenFormatConfigurer authoritiesExtractor(AuthoritiesExtractor extractor) {
-			this.extractor = extractor;
+		public JwtAccessTokenFormatConfigurer authoritiesPopulator(AuthoritiesPopulator populator) {
+			this.populator = populator;
 			return this;
 		}
 
@@ -408,11 +408,24 @@ public final class ResourceServerConfigurer<H extends HttpSecurityBuilder<H>> ex
 					this.jwtAccessTokenFormatConfigurer.jwtDecoder.decoder(),
 					this.jwtAccessTokenFormatConfigurer.validators);
 
-		provider.setAuthoritiesExtractor(this.jwtAccessTokenFormatConfigurer.extractor);
+		if ( this.jwtAccessTokenFormatConfigurer.populator == null ) {
+			Map<String, AuthoritiesPopulator> populators =
+					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, AuthoritiesPopulator.class);
 
-		if ( StringUtils.hasText(this.jwtAccessTokenFormatConfigurer.scopeAttributeName) ) {
-			provider.setScopeAttributeName(this.jwtAccessTokenFormatConfigurer.scopeAttributeName);
+			if ( !populators.isEmpty() ) {
+				this.jwtAccessTokenFormatConfigurer.populator = populators.values().iterator().next();
+			}
 		}
+
+		if ( this.jwtAccessTokenFormatConfigurer.populator == null ) {
+			JwtAuthoritiesPopulator populator = new JwtAuthoritiesPopulator();
+			if ( StringUtils.hasText(this.jwtAccessTokenFormatConfigurer.scopeAttributeName) ) {
+				populator.setScopeAttributeName(this.jwtAccessTokenFormatConfigurer.scopeAttributeName);
+			}
+			this.jwtAccessTokenFormatConfigurer.populator = populator;
+		}
+
+		provider.setAuthoritiesPopulator(this.jwtAccessTokenFormatConfigurer.populator);
 
 		return provider;
 	}

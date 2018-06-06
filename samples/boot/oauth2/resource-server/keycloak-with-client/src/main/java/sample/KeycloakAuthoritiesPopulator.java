@@ -18,13 +18,13 @@ package sample;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.oauth2.core.AuthoritiesExtractor;
-import org.springframework.security.oauth2.resourceserver.authentication.AbstractOAuth2AccessTokenAuthenticationToken;
+import org.springframework.security.oauth2.core.AuthoritiesPopulator;
+import org.springframework.security.oauth2.core.ScopeGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.resourceserver.authentication.JwtAccessTokenAuthenticationToken;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,15 +37,16 @@ import java.util.stream.Collectors;
  *
  * @author Josh Cummings
  */
-public class KeycloakAuthoritiesExtractor implements AuthoritiesExtractor {
+public class KeycloakAuthoritiesPopulator implements AuthoritiesPopulator {
 
 	private GrantedAuthoritiesMapper authoritiesMapper = authorities -> authorities;
 
 	@Override
-	public Collection<GrantedAuthority> extractAuthorities(Authentication authentication) {
-		if ( authentication instanceof AbstractOAuth2AccessTokenAuthenticationToken ) {
-			Map<String, Object> attributes =
-					((AbstractOAuth2AccessTokenAuthenticationToken) authentication).getTokenAttributes();
+	public Authentication populateAuthorities(Authentication authentication) {
+		if ( authentication instanceof JwtAccessTokenAuthenticationToken ) {
+			Jwt jwt = ((JwtAccessTokenAuthenticationToken) authentication).getJwt();
+
+			Map<String, Object> attributes = jwt.getClaims();
 
 			Collection<? extends GrantedAuthority> authorities =
 					Optional.ofNullable(
@@ -54,13 +55,15 @@ public class KeycloakAuthoritiesExtractor implements AuthoritiesExtractor {
 									(List<String>) realmAccess.get("roles"))
 							.orElse(Collections.emptyList())
 							.stream()
-							.map(SimpleGrantedAuthority::new)
+							.map(ScopeGrantedAuthority::new)
 							.collect(Collectors.toList());
 
-			return new ArrayList<>(this.authoritiesMapper.mapAuthorities(authorities));
-		}
+			authorities = this.authoritiesMapper.mapAuthorities(authorities);
 
-		return Collections.emptyList();
+			return new JwtAccessTokenAuthenticationToken(jwt, authorities);
+		} else {
+			return authentication;
+		}
 	}
 
 	public void setAuthoritiesMapper(GrantedAuthoritiesMapper authoritiesMapper) {

@@ -17,10 +17,7 @@
 package org.springframework.security.oauth2.core;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
-
-public interface AuthoritiesExtractor {
-	Collection<GrantedAuthority> extractAuthorities(Authentication authentication);
+public interface AuthoritiesPopulator {
+	Authentication populateAuthorities(Authentication authentication);
 }

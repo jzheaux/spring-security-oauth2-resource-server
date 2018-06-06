@@ -15,11 +15,11 @@
  */
 package org.springframework.security.oauth2.resourceserver.authentication;
 
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.AuthoritiesExtractor;
+import org.springframework.security.oauth2.core.AuthoritiesPopulator;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -31,11 +31,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.resourceserver.web.BearerTokenAuthenticationToken;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * An {@link AuthenticationProvider} implementation of the OAuth2 Resource Server Bearer Token when using Jwt-encoding
@@ -56,9 +54,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 	private final OAuth2TokenValidator<Jwt> validator;
 
-	private AuthoritiesExtractor authoritiesExtractor = (authentication) -> Collections.emptyList();
-
-	private String scopeAttributeName;
+	private AuthoritiesPopulator authoritiesPopulator = (authentication) -> authentication;
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
 		this(jwtDecoder, Arrays.asList(new JwtTimestampsValidator()));
@@ -67,6 +63,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder,
 												Collection<OAuth2TokenValidator<Jwt>> validators) {
 		Assert.notNull(jwtDecoder, "jwtDecoder is required");
+		Assert.notEmpty(validators, "validators cannot be empty");
 
 		this.jwtDecoder = jwtDecoder;
 
@@ -98,17 +95,12 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 			throw new OAuth2AuthenticationException(error, error.toString());
 		}
 
-		Collection<? extends GrantedAuthority> authorities =
-				this.authoritiesExtractor.extractAuthorities(new JwtAccessTokenAuthenticationToken(jwt));
+		Authentication token =
+				this.authoritiesPopulator.populateAuthorities(new JwtAccessTokenAuthenticationToken(jwt));
 
-		JwtAccessTokenAuthenticationToken token =
-				new JwtAccessTokenAuthenticationToken(jwt, authorities);
-
-		if ( StringUtils.hasText(this.scopeAttributeName) ) {
-			token.setScopeAttributeName(this.scopeAttributeName);
+		if ( token instanceof AbstractAuthenticationToken ) {
+			((AbstractAuthenticationToken) token).setDetails(bearer.getDetails());
 		}
-
-		token.setDetails(bearer.getDetails());
 
 		return token;
 	}
@@ -118,13 +110,9 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 		return BearerTokenAuthenticationToken.class.isAssignableFrom(authentication);
 	}
 
-	public void setAuthoritiesExtractor(AuthoritiesExtractor authoritiesExtractor) {
-		Assert.notNull(authoritiesExtractor, "authoritiesExtractor cannot be null");
-		this.authoritiesExtractor = authoritiesExtractor;
-	}
-
-	public void setScopeAttributeName(String scopeAttributeName) {
-		this.scopeAttributeName = scopeAttributeName;
+	public void setAuthoritiesPopulator(AuthoritiesPopulator authoritiesPopulator) {
+		Assert.notNull(authoritiesPopulator, "authoritiesPopulator cannot be null");
+		this.authoritiesPopulator = authoritiesPopulator;
 	}
 
 	private boolean hasValidatorOfType(

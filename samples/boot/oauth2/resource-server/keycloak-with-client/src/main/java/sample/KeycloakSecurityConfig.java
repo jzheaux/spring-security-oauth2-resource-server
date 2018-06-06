@@ -67,8 +67,8 @@ public class KeycloakSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	KeycloakAuthoritiesExtractor keycloakOAuth2TokenAuthoritiesExtractor() {
-		KeycloakAuthoritiesExtractor extractor = new KeycloakAuthoritiesExtractor();
+	KeycloakAuthoritiesPopulator keycloakOAuth2TokenAuthoritiesExtractor() {
+		KeycloakAuthoritiesPopulator extractor = new KeycloakAuthoritiesPopulator();
 
 		extractor.setAuthoritiesMapper(authoritiesMapper());
 
@@ -82,7 +82,7 @@ public class KeycloakSecurityConfig extends WebSecurityConfigurerAdapter {
 			.apply(new ResourceServerConfigurer<>())
 				.jwt()
 					.signature().keys(url(jwkSetUri))
-					.authoritiesExtractor(keycloakOAuth2TokenAuthoritiesExtractor())
+					.authoritiesPopulator(keycloakOAuth2TokenAuthoritiesExtractor())
 					.and()
 				.and()
 			.sessionManagement()
