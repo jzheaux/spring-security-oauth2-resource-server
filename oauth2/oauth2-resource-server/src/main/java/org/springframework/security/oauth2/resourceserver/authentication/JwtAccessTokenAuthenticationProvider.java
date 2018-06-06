@@ -54,7 +54,7 @@ public class JwtAccessTokenAuthenticationProvider implements AuthenticationProvi
 
 	private final OAuth2TokenValidator<Jwt> validator;
 
-	private AuthoritiesPopulator authoritiesPopulator = (authentication) -> authentication;
+	private AuthoritiesPopulator authoritiesPopulator = new JwtAuthoritiesPopulator();
 
 	public JwtAccessTokenAuthenticationProvider(JwtDecoder jwtDecoder) {
 		this(jwtDecoder, Arrays.asList(new JwtTimestampsValidator()));

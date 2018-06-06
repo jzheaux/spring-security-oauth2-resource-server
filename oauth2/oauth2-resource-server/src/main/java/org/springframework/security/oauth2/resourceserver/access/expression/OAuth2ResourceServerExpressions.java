@@ -16,8 +16,9 @@
 package org.springframework.security.oauth2.resourceserver.access.expression;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.core.ScopeClaimAccessor;
+import org.springframework.security.oauth2.core.ScopeGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
 import org.springframework.security.oauth2.resourceserver.InsufficientScopeError;
 import org.springframework.security.oauth2.resourceserver.authentication.AbstractOAuth2AccessTokenAuthenticationToken;
@@ -29,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A class for evaluating SpEL expressions based on OAuth2 Authentication tokens.
@@ -55,7 +57,11 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 
 	@Override
 	public Collection<String> scopes(Authentication authentication) {
-		return scope(authentication).getScope(scopeAttributeName(authentication));
+		return authentication.getAuthorities()
+				.stream()
+				.filter(authority -> authority instanceof ScopeGrantedAuthority)
+				.map(GrantedAuthority::getAuthority)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -137,16 +143,6 @@ public class OAuth2ResourceServerExpressions implements OAuth2Expressions, JwtEx
 		}
 
 		return has;
-	}
-
-	private String scopeAttributeName(Authentication authentication) {
-		return token(authentication)
-					.map(token -> token.getScopeAttributeName())
-					.orElse("scope");
-	}
-
-	private ScopeClaimAccessor scope(Authentication authentication) {
-		return () -> attributes(authentication);
 	}
 
 	protected JwtClaimAccessor jwt(Authentication authentication) {
