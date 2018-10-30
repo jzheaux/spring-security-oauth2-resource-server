@@ -16,6 +16,9 @@
 
 package org.springframework.security.oauth2.resourceserver.web;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,28 +39,29 @@ import org.springframework.util.StringUtils;
  */
 public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 
-	private static final Pattern authorizationPattern = Pattern.compile("^Bearer (?<token>[a-zA-Z0-9-._~+/]+)=*$");
+	static final String ERR_MSG_INVALID_TOKEN_IN_HEADER = "Invalid Bearer token in Authorization header";
+
+	static final String ERR_MSG_MULTIPLE_TOKENS = "Clients MUST NOT use more than one method to transmit the token in each request";
+
+	private static final String ACCESS_TOKEN_PARAM_NAME = "access_token";
+
+	private static final BearerTokenError BEARER_TOKEN_ERROR = new BearerTokenError(
+			BearerTokenErrorCodes.INVALID_REQUEST, HttpStatus.BAD_REQUEST);
+
+	private static final Pattern AUTHORIZATION_PATTERN = Pattern.compile("^Bearer (?<token>[a-zA-Z0-9-._~+/]+)=*$");
 
 	private boolean allowFormEncodedBodyParameter = false;
 
 	private boolean allowUriQueryParameter = false;
 
 	@Override
-	public String resolve(HttpServletRequest request) {
-		String authorizationHeaderToken = resolveFromAuthorizationHeader(request);
-		String parameterToken = request.getParameter("access_token");
-		if (authorizationHeaderToken != null) {
-			if (parameterToken != null) {
-				BearerTokenError error = new BearerTokenError(BearerTokenErrorCodes.INVALID_REQUEST,
-						HttpStatus.BAD_REQUEST);
-				throw new BearerTokenAuthenticationException(error, error.toString());
-			}
-			return authorizationHeaderToken;
+	public String resolve(final HttpServletRequest request) {
+		final String authorizationHeaderToken = resolveFromAuthorizationHeader(request);
+		if ((authorizationHeaderToken != null && request.getParameter(ACCESS_TOKEN_PARAM_NAME) != null)||hasMultipleTokenParams(request)) {
+			throw new BearerTokenAuthenticationException(BEARER_TOKEN_ERROR, ERR_MSG_MULTIPLE_TOKENS);
+		} else {
+			return authorizationHeaderToken != null ? authorizationHeaderToken : resolveFromRequestParameter(request);
 		}
-		else if (parameterToken != null && isParameterTokenSupportedForRequest(request)) {
-			return parameterToken;
-		}
-		return null;
 	}
 
 	/**
@@ -82,13 +86,10 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 
 	private static String resolveFromAuthorizationHeader(HttpServletRequest request) {
 		String authorization = request.getHeader("Authorization");
-		if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer")) {
-			Matcher matcher = authorizationPattern.matcher(authorization);
-
-			if ( !matcher.matches() ) {
-				BearerTokenError error = new BearerTokenError(BearerTokenErrorCodes.INVALID_REQUEST,
-						HttpStatus.BAD_REQUEST);
-				throw new BearerTokenAuthenticationException(error, error.toString());
+		if (authorization != null && authorization.startsWith("Bearer")) {
+			Matcher matcher = AUTHORIZATION_PATTERN.matcher(authorization);
+			if (!matcher.matches()) {
+				throw new BearerTokenAuthenticationException(BEARER_TOKEN_ERROR, ERR_MSG_INVALID_TOKEN_IN_HEADER);
 			}
 
 			return matcher.group("token");
@@ -96,9 +97,30 @@ public final class DefaultBearerTokenResolver implements BearerTokenResolver {
 		return null;
 	}
 
-	private boolean isParameterTokenSupportedForRequest(HttpServletRequest request) {
-		return ((this.allowFormEncodedBodyParameter && "POST".equals(request.getMethod()))
-				|| (this.allowUriQueryParameter && "GET".equals(request.getMethod())));
+	private String resolveFromRequestParameter(HttpServletRequest request) {
+		final boolean tokenInUriQueryParameter = isTokenInUriQueryParameter(request);
+		if (this.allowFormEncodedBodyParameter && !tokenInUriQueryParameter
+				&& "application/x-www-form-urlencoded".equalsIgnoreCase(request.getContentType())
+				&& "POST".equalsIgnoreCase((request.getMethod()))) {
+			return request.getParameter(ACCESS_TOKEN_PARAM_NAME);
+		} else if (this.allowUriQueryParameter && tokenInUriQueryParameter) {
+			return request.getParameter(ACCESS_TOKEN_PARAM_NAME);
+		} else {
+			return null;
+		}
+	}
+
+	private boolean isTokenInUriQueryParameter(HttpServletRequest request) {
+		final String queryString = request.getQueryString();
+		return !StringUtils.isEmpty(queryString) && Arrays.stream(queryString.split("&"))
+				.map(param -> param.split("=")[0]).map(paramName -> paramName.toLowerCase(Locale.ROOT))
+				.anyMatch(Predicate.isEqual(ACCESS_TOKEN_PARAM_NAME));
+	}
+
+	private boolean hasMultipleTokenParams(HttpServletRequest request) {
+		// Due to Servlet API limitations we cannot distinguish form vs query param here
+		final String[] tokenValues = request.getParameterValues(ACCESS_TOKEN_PARAM_NAME);
+		return tokenValues != null && tokenValues.length > 1;
 	}
 
 }

@@ -72,7 +72,7 @@ public class DefaultBearerTokenResolverTests {
 		request.addHeader("Authorization", "Bearer an\"invalid\"token");
 
 		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
-				.hasMessageContaining(("[invalid_request]"));
+				.hasMessageContaining(DefaultBearerTokenResolver.ERR_MSG_INVALID_TOKEN_IN_HEADER);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class DefaultBearerTokenResolverTests {
 		request.addParameter("access_token", TEST_TOKEN);
 
 		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
-				.hasMessageContaining("[invalid_request]");
+				.hasMessageContaining(DefaultBearerTokenResolver.ERR_MSG_MULTIPLE_TOKENS);
 	}
 
 	@Test
@@ -92,10 +92,25 @@ public class DefaultBearerTokenResolverTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Authorization", "Bearer " + TEST_TOKEN);
 		request.setMethod("GET");
+		request.setQueryString("access_token="+TEST_TOKEN);
 		request.addParameter("access_token", TEST_TOKEN);
 
 		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
-				.hasMessageContaining("[invalid_request]");
+				.hasMessageContaining(DefaultBearerTokenResolver.ERR_MSG_MULTIPLE_TOKENS);
+	}
+
+
+	@Test
+	public void resolveWhenMultipleParametersThenAuthenticationExceptionIsThrown() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("application/x-www-form-urlencoded");
+		request.setQueryString("access_token="+TEST_TOKEN);
+		request.addParameter("access_token", TEST_TOKEN);
+		request.addParameter("access_token", TEST_TOKEN);
+
+		assertThatThrownBy(() -> this.resolver.resolve(request)).isInstanceOf(BearerTokenAuthenticationException.class)
+				.hasMessageContaining(DefaultBearerTokenResolver.ERR_MSG_MULTIPLE_TOKENS);
 	}
 
 	@Test
@@ -108,6 +123,29 @@ public class DefaultBearerTokenResolverTests {
 		request.addParameter("access_token", TEST_TOKEN);
 
 		assertThat(this.resolver.resolve(request)).isEqualTo(TEST_TOKEN);
+	}
+
+	@Test
+	public void resolveWhenFormParameterIsPresentWithGetAndSupportedThenTokenIsNotResolved() {
+		this.resolver.setAllowFormEncodedBodyParameter(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
+		request.setContentType("application/x-www-form-urlencoded");
+		request.addParameter("access_token", TEST_TOKEN);
+
+		assertThat(this.resolver.resolve(request)).isNull();
+	}
+
+	@Test
+	public void resolveWhenFormParameterIsPresentWithoutContentTypeAndSupportedThenTokenIsNotResolved() {
+		this.resolver.setAllowFormEncodedBodyParameter(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.addParameter("access_token", TEST_TOKEN);
+
+		assertThat(this.resolver.resolve(request)).isNull();
 	}
 
 	@Test
@@ -126,6 +164,19 @@ public class DefaultBearerTokenResolverTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
+		request.setQueryString("access_token="+TEST_TOKEN);
+		request.addParameter("access_token", TEST_TOKEN);
+
+		assertThat(this.resolver.resolve(request)).isEqualTo(TEST_TOKEN);
+	}
+
+	@Test
+	public void resolveWhenQueryParameterIsPresentWithPostAndSupportedThenTokenIsResolved() {
+		this.resolver.setAllowUriQueryParameter(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setQueryString("access_token="+TEST_TOKEN);
 		request.addParameter("access_token", TEST_TOKEN);
 
 		assertThat(this.resolver.resolve(request)).isEqualTo(TEST_TOKEN);
@@ -135,6 +186,20 @@ public class DefaultBearerTokenResolverTests {
 	public void resolveWhenQueryParameterIsPresentAndNotSupportedThenTokenIsNotResolved() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
+		request.setQueryString("access_token="+TEST_TOKEN);
+		request.addParameter("access_token", TEST_TOKEN);
+
+		assertThat(this.resolver.resolve(request)).isNull();
+	}
+
+
+	@Test
+	public void resolveWhenQueryParameterIsAbsentWithPostAndSupportedThenTokenIsNotResolved() {
+		this.resolver.setAllowUriQueryParameter(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("application/x-www-form-urlencoded");
 		request.addParameter("access_token", TEST_TOKEN);
 
 		assertThat(this.resolver.resolve(request)).isNull();
